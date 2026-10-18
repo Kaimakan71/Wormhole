@@ -1,11 +1,12 @@
 /*
- * Heap services.
+ * Boot heap services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
  */
 
 #include <boot.h>
+#include <mm.h>
 #include <tlsf.h>
 
 static uintn heapPageCount;

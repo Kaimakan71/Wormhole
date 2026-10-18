@@ -3,21 +3,21 @@
 # All rights reserved.
 # Provided under the BSD 3-Clause license.
 
-export BUILD_DIR := $(BUILD_DIR)/boot/
+export BUILD_DIR := $(BUILD_DIR)/boot
 
 export QEMU = qemu-system-$(TOOLCHAIN_ARCH)
 
-export CFLAGS += -I../include
+export CFLAGS += -Iinclude -I../common/include -I$(ARCH_DIR)/include
 export QEMUFLAGS =
 
 export SFILES =
-export CFILES = $(addprefix ../common/,string16.c tlsf.c)
+export CFILES = $(addprefix ../common/,string16.c tlsf.c) $(ARCH_DIR)/boot/mm.c
 
 ifeq ($(TARGET_FIRMWARE),efi)
 	include fw/efi/build.mk
 endif
 
-export CFILES += heap.c main.c
+export CFILES += $(addprefix mm/,heap.c mm.c) image.c main.c
 
 ifeq ($(CONFIG_QEMU_KVM),y)
 	export QEMUFLAGS += --enable-kvm

@@ -45,7 +45,6 @@ static EfiStatus getInfo(EfiFileProtocol *file, EfiFileInfo **info) {
     }
 
     *info = buf;
-
     return EFI_STATUS_SUCCESS;
 }
 
@@ -122,7 +121,6 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
 
     *size = bufSize;
     *data = buf;
-
     return STATUS_SUCCESS;
 }
 

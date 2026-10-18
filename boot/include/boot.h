@@ -29,12 +29,15 @@ void consoleError(const char16 *format, ...);
  * Memory management services.
  */
 
+Status mmInitialize(uintn heapSize);
 Status mmAllocatePages(uintn pageCount, bool executable, void **ptr);
 void mmFreePages(void *ptr, uintn pageCount);
-Status mmHeapInitialize(uintn heapSize);
+Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount);
+Status mmGetPhysicalAddress(uintn virtualAddress, uintn *physicalAddress);
+void mmActivateMappings();
 void *mmHeapAllocate(uintn size);
 void mmHeapFree(void *ptr);
-void mmHeapShutdown();
+void mmShutdown();
 
 /*
  * Filesystem services.
@@ -43,6 +46,12 @@ void mmHeapShutdown();
 Status fsInitialize();
 Status fsLoad(const char16 *path, void **data, uintn *size);
 void fsShutdown();
+
+/*
+ * Image loading services.
+ */
+
+Status imgLoad(void *image, uintn imageSize, uintn *entry);
 
 /*
  * Boot manager main routine.

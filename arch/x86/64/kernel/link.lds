@@ -1,3 +1,10 @@
+/*
+ * x86-64 kernel linker script.
+ * Copyright (c) 2026, Quinn Stephens.
+ * All rights reserved.
+ * Provided under the BSD 3-Clause license.
+ */
+
 OUTPUT_FORMAT(elf64-x86-64)
 OUTPUT_ARCH(i386:x86-64)
 ENTRY(kernelMain)

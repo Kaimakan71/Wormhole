@@ -14,7 +14,7 @@
 Status libInitialize() {
     Status status;
 
-    status = mmHeapInitialize(HEAP_SIZE);
+    status = mmInitialize(HEAP_SIZE);
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
     }
@@ -29,13 +29,13 @@ Status libInitialize() {
 
 void libShutdown() {
     fsShutdown();
-    mmHeapShutdown();
+    mmShutdown();
 }
 
 Status bootMain() {
     Status status;
     void *kernel;
-    uintn kernelSize;
+    uintn kernelSize, kernelEntry;
 
     consoleDebug(L"Starting boot manager...\r\n");
 
@@ -51,8 +51,15 @@ Status bootMain() {
         return status;
     }
 
+    status = imgLoad(kernel, kernelSize, &kernelEntry);
     mmHeapFree(kernel);
+    if (!STATUS_IS_SUCCESS(status)) {
+        libShutdown();
+        return status;
+    }
+
     libShutdown();
+    consoleDebug(L"Kernel entry point: 0x%x\r\n", kernelEntry);
 
     return STATUS_SUCCESS;
 }
