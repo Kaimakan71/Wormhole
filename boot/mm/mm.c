@@ -23,10 +23,16 @@ Status mmInitialize(uintn heapSize) {
         return status;
     }
 
+    status = mmFwInitialize();
+    if (!STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
     return STATUS_SUCCESS;
 }
 
 void mmShutdown() {
+    mmFwShutdown();
     mmHeapShutdown();
     mmArchShutdown();
 }

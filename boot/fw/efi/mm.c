@@ -5,7 +5,22 @@
  * Provided under the BSD 3-Clause license.
  */
 
+#include <mm.h>
 #include "bootefi.h"
+
+static inline bool shouldMap(uint64 start, uint64 pageCount, EfiMemoryType memoryType, uintn stack) {
+    if (memoryType == efiLoadedImage->imageCodeType ||
+        memoryType == efiLoadedImage->imageDataType) {
+        return true;
+    }
+
+    if (stack >= start &&
+        stack <= (start + (pageCount << EFI_PAGE_SHIFT))) {
+        return true;
+    }
+
+    return false;
+}
 
 EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapKey, uintn *descriptorSize, uint32 *descriptorVersion) {
     uintn bufSize;
@@ -45,6 +60,38 @@ EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapK
     return EFI_STATUS_TIMEOUT;
 }
 
+Status mmFwInitialize() {
+    Status status;
+    EfiMemoryDescriptor *map, *desc;
+    uintn mapSize, mapKey, descriptorSize, stack;
+    uint32 descriptorVersion;
+
+    status = efiStatusToStatus(efiGetMemoryMap(&map, &mapSize, &mapKey, &descriptorSize, &descriptorVersion));
+    if (!STATUS_IS_SUCCESS(status)) {
+        consoleError(L"Failed to get EFI memory map\r\n");
+        return status;
+    }
+
+    consoleDebug(L"Mapping boot manager...\r\n");
+    desc = map;
+    stack = mmArchGetStack();
+    for (uintn d = 0; d < (mapSize / descriptorSize); d++) {
+        if (shouldMap(desc->physicalStart, desc->pageCount, (EfiMemoryType) desc->type, stack)) {
+            status = mmMapPages(desc->physicalStart, desc->physicalStart, desc->pageCount);
+            if (!STATUS_IS_SUCCESS(status)) {
+                consoleError(L"Failed to map %64u page(s) at 0x%64x\r\n", desc->pageCount, desc->physicalStart);
+                mmHeapFree(map);
+                return status;
+            }
+        }
+
+        desc = (EfiMemoryDescriptor *) ((uintn) desc + descriptorSize);
+    }
+
+    mmHeapFree(map);
+    return STATUS_SUCCESS;
+}
+
 Status mmAllocatePages(uintn pageCount, bool executable, void **ptr) {
     EfiStatus efiStatus;
     EfiPhysicalAddress efiAddress;
@@ -71,4 +118,8 @@ void mmFreePages(void *ptr, uintn pageCount) {
     if (status != EFI_STATUS_SUCCESS) {
         consoleWarning(L"Failed to free %u page(s) at 0x%x\r\n", pageCount, ptr);
     }
+}
+
+void mmFwShutdown() {
+
 }

@@ -6,6 +6,7 @@
  */
 
 #include <boot.h>
+#include <cpu.h>
 
 #define HEAP_SIZE 0x4000
 
@@ -58,8 +59,7 @@ Status bootMain() {
         return status;
     }
 
-    libShutdown();
-    consoleDebug(L"Kernel entry point: 0x%x\r\n", kernelEntry);
-
-    return STATUS_SUCCESS;
+    consoleDebug(L"Activating mappings...\r\n");
+    mmActivateMappings();
+    cpuHang();
 }

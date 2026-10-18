@@ -9,6 +9,30 @@
 
 #include <types.h>
 
+#define cpuIntEnable()  ASMV("sti")
+#define cpuIntDisable() ASMV("cli")
+
+#define cpuHang() ({  \
+    ASMV("cli; hlt"); \
+    unreachable();    \
+})
+
+static inline uint64 cpuGetRip() {
+    uint64 rip;
+
+    ASMV("lea (%%rip), %0" : "=r" (rip));
+
+    return rip;
+}
+
+static inline uint64 cpuGetRsp() {
+    uint64 rsp;
+
+    ASMV("mov %%rsp, %0" : "=r" (rsp));
+
+    return rsp;
+}
+
 static inline void cpuSetCr3(uint64 cr3) {
     ASMV("movq %0, %%cr3" : : "r" (cr3) : "memory");
 }

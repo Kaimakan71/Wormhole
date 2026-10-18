@@ -70,6 +70,10 @@ Status mmArchInitialize() {
     return STATUS_SUCCESS;
 }
 
+uintn mmArchGetStack() {
+    return cpuGetRsp();
+}
+
 Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) {
     PagemapCache cache;
     uint16 pml4Index, pdptIndex, pdIndex, ptIndex;
