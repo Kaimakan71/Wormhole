@@ -18,6 +18,7 @@
 #define TLSF_ALIGN BIT(TLSF_ALIGN_LOG2)
 
 void *tlsfInitialize(void *memory, uintn size);
-void *tlsfAllocate(void *pool, uintn size);
-void tlsfFree(void *pool, void *ptr);
-void *tlsfResize(void *pool, void *ptr, uintn size);
+bool tlsfAddPool(void *tlsf, void *memory, uintn size);
+void *tlsfAllocate(void *tlsf, uintn size);
+void tlsfFree(void *tlsf, void *ptr);
+void *tlsfResize(void *tlsf, void *ptr, uintn size);

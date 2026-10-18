@@ -346,24 +346,42 @@ static void *blockPrepareUsed(Control *ctl, BlockHeader *block, uintn size) {
     return blockToPtr(block);
 }
 
-void *tlsfInitialize(void *memory, uintn size) {
-    uintn overhead, poolSize;
-    void *pool;
-    Control *ctl;
+bool tlsfAddPool(void *tlsf, void *memory, uintn size) {
+    uintn poolSize;
     BlockHeader *block, *next;
+
+    poolSize = ALIGN_DOWN(size - POOL_OVERHEAD, TLSF_ALIGN);
+    if (poolSize < BLOCK_SIZE_MIN || poolSize > BLOCK_SIZE_MAX) {
+        return false;
+    }
+
+    /* Create main free block */
+    block = offsetToBlock(memory, -BLOCK_HEADER_OVERHEAD);
+    blockSetSize(block, poolSize);
+    blockSetFree(block);
+    blockSetPrevUsed(block);
+    blockInsert(tlsf, block);
+
+    /* Split off sentinel block */
+    next = blockLinkNext(block);
+    blockSetSize(next, 0);
+    blockSetUsed(next);
+    blockSetPrevFree(next);
+
+    return true;
+}
+
+void *tlsfInitialize(void *memory, uintn size) {
+    Control *ctl;
+
+    if (size < sizeof(*ctl)) {
+        return NULL;
+    }
 
     if ((uintn) memory % TLSF_ALIGN) {
         return NULL;
     }
 
-    overhead = sizeof(Control) + POOL_OVERHEAD;
-    pool = (void *) ((uintn) memory + sizeof(Control));
-    poolSize = ALIGN_DOWN(size - overhead, TLSF_ALIGN);
-    if (poolSize < BLOCK_SIZE_MIN || poolSize > BLOCK_SIZE_MAX) {
-        return NULL;
-    }
-
-    /* Initialize control structure */
     ctl = memory;
     ctl->nullBlock.nextFree = &ctl->nullBlock;
     ctl->nullBlock.prevFree = &ctl->nullBlock;
@@ -375,32 +393,23 @@ void *tlsfInitialize(void *memory, uintn size) {
         }
     }
 
-    /* Create main free block */
-    block = offsetToBlock(pool, -BLOCK_HEADER_OVERHEAD);
-    blockSetSize(block, poolSize);
-    blockSetFree(block);
-    blockSetPrevUsed(block);
-    blockInsert(ctl, block);
+    if (!tlsfAddPool(ctl, ctl + 1, size - sizeof(*ctl))) {
+        return NULL;
+    }
 
-    /* Split into sentinel block */
-    next = blockLinkNext(block);
-    blockSetSize(next, 0);
-    blockSetUsed(next);
-    blockSetPrevFree(next);
-
-    return memory;
+    return ctl;
 }
 
-void *tlsfAllocate(void *pool, uintn size) {
+void *tlsfAllocate(void *tlsf, uintn size) {
     BlockHeader *block;
 
     size = adjustRequestSize(size, TLSF_ALIGN);
-    block = blockLocateFree(pool, size);
+    block = blockLocateFree(tlsf, size);
 
-    return blockPrepareUsed(pool, block, size);
+    return blockPrepareUsed(tlsf, block, size);
 }
 
-void tlsfFree(void *pool, void *ptr) {
+void tlsfFree(void *tlsf, void *ptr) {
     BlockHeader *block;
 
     if (ptr == NULL) {
@@ -409,22 +418,22 @@ void tlsfFree(void *pool, void *ptr) {
 
     block = ptrToBlock(ptr);
     blockMarkFree(block);
-    block = blockMergePrev(pool, block);
-    block = blockMergeNext(pool, block);
-    blockInsert(pool, block);
+    block = blockMergePrev(tlsf, block);
+    block = blockMergeNext(tlsf, block);
+    blockInsert(tlsf, block);
 }
 
-void *tlsfResize(void *pool, void *ptr, uintn size) {
+void *tlsfResize(void *tlsf, void *ptr, uintn size) {
     BlockHeader *block, *next;
     uintn curSize, combined, adjust;
     void *newPtr;
 
     if (ptr == NULL) {
-        return tlsfAllocate(pool, size);
+        return tlsfAllocate(tlsf, size);
     }
 
     if (size == 0) {
-        tlsfFree(pool, ptr);
+        tlsfFree(tlsf, ptr);
         return NULL;
     }
 
@@ -436,24 +445,24 @@ void *tlsfResize(void *pool, void *ptr, uintn size) {
     adjust = adjustRequestSize(size, TLSF_ALIGN);
 
     if (adjust > curSize && (!blockIsFree(next) || adjust > combined)) {
-        newPtr = tlsfAllocate(pool, size);
+        newPtr = tlsfAllocate(tlsf, size);
         if (newPtr == NULL) {
             return NULL;
         }
 
         /* TODO: Copy over old data */
         /* memcpy(newPtr, ptr, min(curSize, size)); */
-        tlsfFree(pool, ptr);
+        tlsfFree(tlsf, ptr);
 
         return newPtr;
     }
 
     if (adjust > curSize) {
-        blockMergeNext(pool, block);
+        blockMergeNext(tlsf, block);
         blockMarkUsed(block);
     }
 
-    blockTrimUsed(pool, block, adjust);
+    blockTrimUsed(tlsf, block, adjust);
 
     return ptr;
 }
