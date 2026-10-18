@@ -8,7 +8,7 @@
 #include <boot.h>
 #include <cpu.h>
 
-#define HEAP_SIZE 0x4000
+#define HEAP_SIZE 0x8000
 
 #define KERNEL_PATH L"\\kernel.elf"
 
@@ -63,7 +63,7 @@ Status bootMain() {
     }
 
     status = imgLoad(kernel, kernelSize, &kernelEntry);
-    mmHeapFree(kernel);
+    mmFreePages(kernel, SIZE_TO_PAGES(kernelSize));
     if (!STATUS_IS_SUCCESS(status)) {
         libShutdown();
         return status;

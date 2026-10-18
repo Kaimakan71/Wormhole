@@ -78,7 +78,7 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
     Status status;
     EfiFileProtocol *file;
     EfiFileInfo *info;
-    uintn bufSize;
+    uintn bufSize, pageCount;
     void *buf;
 
     consoleDebug(L"Loading file \"%s\"...\r\n", path);
@@ -104,9 +104,10 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
     bufSize = info->fileSize;
     mmHeapFree(info);
 
-    buf = mmHeapAllocate(bufSize);
-    if (buf == NULL) {
-        consoleError(L"Failed to allocate buffer for file \"%s\"\r\n", path);
+    pageCount = SIZE_TO_PAGES(bufSize);
+    status = mmAllocatePages(pageCount, false, &buf);
+    if (!STATUS_IS_SUCCESS(status)) {
+        consoleError(L"Failed to allocate %u page(s) for file \"%s\"\r\n", pageCount, path);
         close(file);
         return STATUS_ALLOCATION_FAILED;
     }
@@ -115,7 +116,7 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
     close(file);
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to read file \"%s\"\r\n", path);
-        mmHeapFree(buf);
+        mmFreePages(buf, pageCount);
         return status;
     }
 
