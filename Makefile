@@ -15,9 +15,11 @@ endif
 .PHONY: all
 all:
 	@$(MAKE) -C boot/
+	@$(MAKE) -C kernel/
 
 .PHONY: clean
 clean:
+	@$(MAKE) -C kernel/ clean
 	@$(MAKE) -C boot/ clean
 
 .PHONY: run

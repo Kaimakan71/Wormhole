@@ -34,6 +34,7 @@ all: $(BUILD_DIR)/$(EXE_NAME)
 run:
 	@mkdir -p disk/EFI/Boot
 	@cp $(BUILD_DIR)/$(EXE_NAME) disk/EFI/Boot/bootx64.efi
+	@cp $(BUILD_DIR)/../kernel/kernel.elf disk/kernel.elf
 	@$(QEMU) $(QEMUFLAGS)
 
 include ../subproj.mk

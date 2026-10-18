@@ -9,6 +9,8 @@
 
 #define HEAP_SIZE 0x4000
 
+#define KERNEL_PATH L"\\kernel.elf"
+
 Status libInitialize() {
     Status status;
 
@@ -32,6 +34,8 @@ void libShutdown() {
 
 Status bootMain() {
     Status status;
+    void *kernel;
+    uintn kernelSize;
 
     consoleDebug(L"Starting boot manager...\r\n");
 
@@ -41,6 +45,13 @@ Status bootMain() {
         return status;
     }
 
+    status = fsLoad(KERNEL_PATH, &kernel, &kernelSize);
+    if (!STATUS_IS_SUCCESS(status)) {
+        libShutdown();
+        return status;
+    }
+
+    mmHeapFree(kernel);
     libShutdown();
 
     return STATUS_SUCCESS;

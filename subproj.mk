@@ -6,6 +6,11 @@
 OFILES = $(patsubst %.S,$(BUILD_DIR)/%.S.o,$(SFILES)) $(patsubst %.c,$(BUILD_DIR)/%.o,$(CFILES))
 DFILES = $(OFILES:.o=.d)
 
+$(BUILD_DIR)/$(ELF_NAME): $(OFILES)
+	@echo "  LD $@"
+	@mkdir -p $(dir $@)
+	@$(LD) $^ $(LDFLAGS) -o $@
+
 $(BUILD_DIR)/$(EXE_NAME): $(OFILES)
 	@echo "  LD $@"
 	@mkdir -p $(dir $@)
