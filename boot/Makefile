@@ -8,7 +8,7 @@ export BUILD_DIR := $(BUILD_DIR)/boot
 export QEMU = qemu-system-$(TOOLCHAIN_ARCH)
 
 export CFLAGS += -Iinclude -I../common/include -I$(ARCH_DIR)/include
-export QEMUFLAGS = -d int,cpu_reset
+export QEMUFLAGS =
 
 export SFILES =
 export CFILES = $(addprefix ../common/,string16.c tlsf.c) $(ARCH_DIR)/boot/mm.c
