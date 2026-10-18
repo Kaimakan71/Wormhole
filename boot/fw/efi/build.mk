@@ -12,4 +12,4 @@ export CFLAGS += -target $(TOOLCHAIN_ARCH)-windows-unknown -fshort-wchar
 export LDFLAGS += -nodefaultlib -subsystem:efi_application -entry:efiEntry
 export QEMUFLAGS += -L . -bios OVMF.fd -hda fat:rw:disk
 
-export CFILES += $(addprefix fw/efi/,status.c console.c protocol.c mm.c fs.c display.c entry.c)
+export CFILES += $(addprefix fw/efi/,status.c console.c protocol.c mm.c fs.c display.c fw.c entry.c)

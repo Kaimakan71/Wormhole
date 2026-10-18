@@ -62,6 +62,12 @@ Status displayInitialize(Framebuffer *fb);
 void displayShutdown();
 
 /*
+ * Firmware services.
+ */
+
+Status fwShutdown();
+
+/*
  * Boot manager main routine.
  */
 

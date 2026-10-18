@@ -15,6 +15,8 @@
 Status libInitialize(BootInfo *bootInfo) {
     Status status;
 
+    bootInfo->signature = BOOT_INFO_SIGNATURE;
+
     status = mmInitialize(HEAP_SIZE);
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
@@ -67,10 +69,20 @@ Status bootMain() {
         return status;
     }
 
-    consoleDebug(L"Executing kernel...\r\n");
+    /*
+     * This is the point of no return.
+     * Once we disable firmware services, we must either
+     * transition to the kernel or hang.
+     */
+
+    status = fwShutdown();
+    if (!STATUS_IS_SUCCESS(status)) {
+        libShutdown();
+        return status;
+    }
+
     mmActivateMappings();
     kernelMain = (void *) kernelEntry;
-    bootInfo.signature = BOOT_INFO_SIGNATURE;
     kernelMain(&bootInfo);
     cpuHang();
 }
