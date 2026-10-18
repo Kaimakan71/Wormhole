@@ -8,6 +8,7 @@
 #include <bootinfo.h>
 #include <console.h>
 #include <cpu.h>
+#include <log.h>
 
 void kernelMain(BootInfo *bootInfo) {
     if (bootInfo->signature != BOOT_INFO_SIGNATURE) {
@@ -15,6 +16,8 @@ void kernelMain(BootInfo *bootInfo) {
     }
 
     consoleInitialize(&bootInfo->fb);
-    consoleWrite("Hello, Wormhole!\n");
+    logWrite("Starting kernel...\n");
+
+    logWrite("Goodbye!\n");
     cpuHang();
 }
