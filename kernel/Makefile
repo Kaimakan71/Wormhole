@@ -14,7 +14,11 @@ export CFLAGS += -Iinclude -I../common/include -I$(ARCH_DIR)/include -target $(T
 export LDFLAGS += -T$(ARCH_DIR)/kernel/link.lds -zmax-page-size=0x1000
 
 export SFILES =
-export CFILES = ../common/string8.c console.c log.c main.c
+export CFILES = $(addprefix ../common/,string8.c)
+
+include $(ARCH_DIR)/kernel/build.mk
+
+export CFILES += console.c log.c main.c
 
 .PHONY: all
 all: $(BUILD_DIR)/$(ELF_NAME)

@@ -9,6 +9,10 @@
 
 #include <types.h>
 
+#define CACHE_LINE_SIZE 64
+
+#define __cacheline_aligned __align(CACHE_LINE_SIZE)
+
 #define cpuIntEnable()  ASMV("sti")
 #define cpuIntDisable() ASMV("cli")
 
@@ -36,3 +40,5 @@ static inline uint64 cpuGetRsp() {
 static inline void cpuSetCr3(uint64 cr3) {
     ASMV("movq %0, %%cr3" : : "r" (cr3) : "memory");
 }
+
+void cpuEarlyInitialize();

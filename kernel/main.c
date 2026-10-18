@@ -15,6 +15,8 @@ void kernelMain(BootInfo *bootInfo) {
         return;
     }
 
+    cpuEarlyInitialize();
+
     consoleInitialize(&bootInfo->fb);
     logWrite("Starting kernel...\n");
 

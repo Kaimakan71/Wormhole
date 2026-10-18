@@ -1,3 +1,10 @@
+/*
+ * Logging services.
+ * Copyright (c) 2026, Quinn Stephens.
+ * All rights reserved.
+ * Provided under the BSD 3-Clause license.
+ */
+
 #pragma once
 
 #include <types.h>
