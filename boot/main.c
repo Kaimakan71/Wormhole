@@ -12,9 +12,7 @@
 
 #define KERNEL_PATH L"\\kernel.elf"
 
-static Framebuffer fb;
-
-Status libInitialize() {
+Status libInitialize(BootInfo *bootInfo) {
     Status status;
 
     status = mmInitialize(HEAP_SIZE);
@@ -27,7 +25,7 @@ Status libInitialize() {
         return status;
     }
 
-    status = displayInitialize(&fb);
+    status = displayInitialize(&bootInfo->fb);
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
     }
@@ -43,12 +41,14 @@ void libShutdown() {
 
 Status bootMain() {
     Status status;
+    BootInfo bootInfo;
     void *kernel;
     uintn kernelSize, kernelEntry;
+    __sysv_abi void (*kernelMain)(BootInfo *);
 
     consoleDebug(L"Starting boot manager...\r\n");
 
-    status = libInitialize();
+    status = libInitialize(&bootInfo);
     if (!STATUS_IS_SUCCESS(status)) {
         libShutdown();
         return status;
@@ -67,7 +67,10 @@ Status bootMain() {
         return status;
     }
 
-    consoleDebug(L"Activating mappings...\r\n");
+    consoleDebug(L"Executing kernel...\r\n");
     mmActivateMappings();
+    kernelMain = (void *) kernelEntry;
+    bootInfo.signature = BOOT_INFO_SIGNATURE;
+    kernelMain(&bootInfo);
     cpuHang();
 }
