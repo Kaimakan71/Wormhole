@@ -6,7 +6,7 @@
  */
 
 #include <boot.h>
-#include <mm.h>
+#include <bootmm.h>
 #include <tlsf.h>
 
 static uintn heapPageCount;

@@ -40,3 +40,4 @@ EfiStatus efiLocateProtocol(const EfiGuid *protocol, void **interface);
  */
 
 EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapKey, uintn *descriptorSize, uint32 *descriptorVersion);
+EfiStatus efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn descriptorCount, MemoryRegion *regions, uintn *regionCountOut);

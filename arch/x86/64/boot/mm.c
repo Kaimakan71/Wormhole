@@ -6,9 +6,9 @@
  */
 
 #include <boot.h>
+#include <bootmm.h>
 #include <cpu.h>
-#include <mm.h>
-#include <pagemap.h>
+#include <cpu/pagemap.h>
 
 typedef struct {
     PagemapEntry *pdpt;

@@ -5,7 +5,7 @@
  * Provided under the BSD 3-Clause license.
  */
 
-#include <mm.h>
+#include <bootmm.h>
 #include "bootefi.h"
 
 static inline bool shouldMap(uint64 start, uint64 pageCount, EfiMemoryType memoryType, uintn stack) {
@@ -20,6 +20,23 @@ static inline bool shouldMap(uint64 start, uint64 pageCount, EfiMemoryType memor
     }
 
     return false;
+}
+
+static uint8 getMemoryType(EfiMemoryDescriptor *descriptor) {
+    if (descriptor->attributes & EFI_MEMORY_ATTRIBUTE_RUNTIME) {
+        return MEMORY_TYPE_FIRMWARE;
+    }
+
+    switch (descriptor->type) {
+    case EFI_MEMORY_TYPE_BOOT_SERVICES_CODE:
+    case EFI_MEMORY_TYPE_BOOT_SERVICES_DATA:
+    case EFI_MEMORY_TYPE_CONVENTIONAL:
+        return MEMORY_TYPE_FREE;
+    case EFI_MEMORY_TYPE_PERSISTENT:
+        return MEMORY_TYPE_PERSISTENT;
+    default:
+        return MEMORY_TYPE_RESERVED;
+    }
 }
 
 EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapKey, uintn *descriptorSize, uint32 *descriptorVersion) {
@@ -58,6 +75,44 @@ EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapK
     }
 
     return EFI_STATUS_TIMEOUT;
+}
+
+EfiStatus efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn descriptorCount, MemoryRegion *regions, uintn *regionCountOut) {
+    MemoryRegion *region;
+    uintn regionCount;
+    EfiMemoryDescriptor *desc;
+    uint8 type;
+
+    region = regions;
+    regionCount = 0;
+
+    desc = &map[0];
+    for (uintn d = 0; d < descriptorCount; d++) {
+        type = getMemoryType(desc);
+
+        if (type == MEMORY_TYPE_RESERVED) {
+            /* Leave reserved regions as gaps */
+        } else if (regionCount != 0                        &&
+            region->type == type                           &&
+            region->physicalAddress == desc->physicalStart &&
+            region->virtualAddress == desc->virtualStart) {
+            /* Merge with previous region */
+            region->pageCount += desc->pageCount;
+        } else {
+            /* Allocate new region */
+            region++;
+            region->virtualAddress = desc->virtualStart;
+            region->physicalAddress = desc->physicalStart;
+            region->pageCount = desc->pageCount;
+            region->type = type;
+            regionCount++;
+        }
+
+        desc = (EfiMemoryDescriptor *) ((uintn) desc + descriptorSize);
+    }
+
+    *regionCountOut = regionCount;
+    return EFI_STATUS_SUCCESS;
 }
 
 Status mmFwInitialize() {

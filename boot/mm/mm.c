@@ -6,7 +6,7 @@
  */
 
 #include <boot.h>
-#include <mm.h>
+#include <bootmm.h>
 
 Status mmInitialize(uintn heapSize) {
     Status status;

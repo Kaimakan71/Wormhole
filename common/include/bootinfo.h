@@ -22,9 +22,25 @@ typedef struct {
     PixelFormat pixelFormat;
 } Framebuffer;
 
+#define MEMORY_TYPE_FREE       0
+#define MEMORY_TYPE_FIRMWARE   1
+#define MEMORY_TYPE_PERSISTENT 2
+#define MEMORY_TYPE_RESERVED   0xff
+
+typedef struct {
+    uint64 physicalAddress;
+    uint64 virtualAddress;
+    uintn pageCount;
+    uint8 type;
+} MemoryRegion;
+
 #define BOOT_INFO_SIGNATURE 0x4f464e49544f4f42 /* "BOOTINFO" */
 
 typedef struct {
     uint64 signature;
+
     Framebuffer fb;
+
+    uintn memoryRegionCount;
+    MemoryRegion *memoryRegions;
 } BootInfo;
