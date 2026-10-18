@@ -72,7 +72,6 @@ Status mmFwInitialize() {
         return status;
     }
 
-    consoleDebug(L"Mapping boot manager...\r\n");
     desc = map;
     stack = mmArchGetStack();
     for (uintn d = 0; d < (mapSize / descriptorSize); d++) {

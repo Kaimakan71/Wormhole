@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <bootinfo.h>
 #include <status.h>
 
 #define PAGE_SIZE  0x1000
@@ -52,6 +53,13 @@ void fsShutdown();
  */
 
 Status imgLoad(void *image, uintn imageSize, uintn *entry);
+
+/*
+ * Display services.
+ */
+
+Status displayInitialize(Framebuffer *fb);
+void displayShutdown();
 
 /*
  * Boot manager main routine.

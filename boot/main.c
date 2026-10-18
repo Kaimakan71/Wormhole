@@ -12,6 +12,8 @@
 
 #define KERNEL_PATH L"\\kernel.elf"
 
+static Framebuffer fb;
+
 Status libInitialize() {
     Status status;
 
@@ -25,10 +27,16 @@ Status libInitialize() {
         return status;
     }
 
+    status = displayInitialize(&fb);
+    if (!STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
     return STATUS_SUCCESS;
 }
 
 void libShutdown() {
+    displayShutdown();
     fsShutdown();
     mmShutdown();
 }
