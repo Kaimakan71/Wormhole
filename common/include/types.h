@@ -94,7 +94,7 @@ typedef __builtin_va_list VaList;
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
 #define ALIGN_DOWN(x, a) ((x) - ((x) & ((a) - 1)))
-#define ALIGN_UP(x, a)   (((x) + ((align) - 1)) & ~((align) - 1))
+#define ALIGN_UP(x, a)   (((x) + ((a) - 1)) & ~((a) - 1))
 
 #define ARRAY_LENGTH(a) (sizeof(a) / sizeof((a)[0]))
 
