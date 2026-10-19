@@ -77,7 +77,7 @@ EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapK
     return EFI_STATUS_TIMEOUT;
 }
 
-EfiStatus efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn descriptorCount, MemoryRegion *regions, uintn *regionCountOut) {
+void efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn descriptorCount, MemoryRegion *regions, uintn *regionCountOut) {
     MemoryRegion *region;
     uintn regionCount;
     EfiMemoryDescriptor *desc;
@@ -112,7 +112,6 @@ EfiStatus efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, 
     }
 
     *regionCountOut = regionCount;
-    return EFI_STATUS_SUCCESS;
 }
 
 Status mmFwInitialize() {

@@ -65,7 +65,7 @@ void displayShutdown();
  * Firmware services.
  */
 
-Status fwShutdown();
+Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount);
 
 /*
  * Boot manager main routine.

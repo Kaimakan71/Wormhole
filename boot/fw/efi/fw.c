@@ -8,11 +8,12 @@
 #include <cpu.h>
 #include "bootefi.h"
 
-Status fwShutdown() {
+Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount) {
     Status status;
     EfiMemoryDescriptor *map;
-    uintn mapSize, mapKey, descriptorSize;
+    uintn mapSize, mapKey, descriptorSize, descriptorCount;
     uint32 descriptorVersion;
+    MemoryRegion *regions;
 
     consoleDebug(L"Exiting firmware environment...\r\n");
 
@@ -24,6 +25,17 @@ Status fwShutdown() {
         consoleError(L"Failed to get EFI memory map\r\n");
         return status;
     }
+
+    descriptorCount = mapSize / descriptorSize;
+    regions = mmHeapAllocate(sizeof(*regions) * descriptorCount);
+    if (regions == NULL) {
+        consoleError(L"Failed to allocate memory for memory region descriptors\r\n");
+        mmHeapFree(map);
+        return STATUS_ALLOCATION_FAILED;
+    }
+
+    efiTranslateMemoryMap(map, descriptorSize, descriptorCount, regions, regionCount);
+    *memoryRegions = regions;
 
     status = efiStatusToStatus(efiBootServices->exitBootServices(efiImageHandle, mapKey));
     if (!STATUS_IS_SUCCESS(status)) {

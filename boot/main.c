@@ -75,7 +75,7 @@ Status bootMain() {
      * transition to the kernel or hang.
      */
 
-    status = fwShutdown();
+    status = fwShutdown(&bootInfo.memoryRegions, &bootInfo.memoryRegionCount);
     if (!STATUS_IS_SUCCESS(status)) {
         libShutdown();
         return status;
