@@ -1,5 +1,5 @@
 /*
- * x86-64 pagemap definitions.
+ * Pagemap definitions.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -28,3 +28,6 @@ typedef uint64 PagemapEntry;
 #define PAGEMAP_ENTRY_GLOBAL       BIT(8)
 #define PAGEMAP_ENTRY_HLAT_RESTART BIT(11)
 #define PAGEMAP_ENTRY_XD           BIT(63)
+
+#define HUGE_PAGE_SIZE  (2 * 1024 * 1024)
+#define HUGE_PAGE_PAGES 512

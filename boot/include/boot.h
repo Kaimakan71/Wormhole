@@ -49,17 +49,17 @@ Status fsLoad(const char16 *path, void **data, uintn *size);
 void fsShutdown();
 
 /*
- * Image loading services.
- */
-
-Status imgLoad(void *image, uintn imageSize, uintn *entry);
-
-/*
  * Display services.
  */
 
 Status displayInitialize(Framebuffer *fb);
 void displayShutdown();
+
+/*
+ * Image loading services.
+ */
+
+Status imgLoad(void *image, uintn imageSize, uintn *entry);
 
 /*
  * Firmware services.

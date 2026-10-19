@@ -10,6 +10,8 @@
 #include <cpu.h>
 #include <cpu/pagemap.h>
 
+#define PAGEMAP_INDEX_INVALID 0xffff
+
 typedef struct {
     PagemapEntry *pdpt;
     PagemapEntry *pd;
@@ -77,44 +79,59 @@ uintn mmArchGetStack() {
 Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) {
     PagemapCache cache;
     uint16 pml4Index, pdptIndex, pdIndex, ptIndex;
+    PagemapEntry entryFlags;
 
-    cache.pml4Index = 0xffff;
-    cache.pdptIndex = 0xffff;
-    cache.pdIndex = 0xffff;
-    while (pageCount--) {
+    entryFlags = PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE;
+
+    cache.pml4Index = PAGEMAP_INDEX_INVALID;
+    while (pageCount) {
         pml4Index = getPagemapIndex(virtualAddress, 4);
-        pdptIndex = getPagemapIndex(virtualAddress, 3);
-        pdIndex = getPagemapIndex(virtualAddress, 2);
-        ptIndex = getPagemapIndex(virtualAddress, 1);
-
-        /* Update cache as needed */
         if (pml4Index != cache.pml4Index) {
             cache.pml4Index = pml4Index;
+            cache.pdptIndex = PAGEMAP_INDEX_INVALID;
             cache.pdpt = getNextLevel(pml4, pml4Index);
-
-            cache.pdptIndex = pdptIndex;
-            cache.pd = getNextLevel(cache.pdpt, pdptIndex);
-
-            cache.pdIndex = pdIndex;
-            cache.pt = getNextLevel(cache.pd, pdIndex);
-        } else if (pdptIndex != cache.pdptIndex) {
-            cache.pdptIndex = pdptIndex;
-            cache.pd = getNextLevel(cache.pdpt, pdptIndex);
-
-            cache.pdIndex = pdIndex;
-            cache.pt = getNextLevel(cache.pd, pdIndex);
-        } else if (pdIndex != cache.pdIndex) {
-            cache.pdIndex = pdIndex;
-            cache.pt = getNextLevel(cache.pd, pdIndex);
-        }
-        if (cache.pt == NULL) {
-            return STATUS_ALLOCATION_FAILED;
+            if (cache.pdpt == NULL) {
+                return STATUS_ALLOCATION_FAILED;
+            }
         }
 
-        /* Map individual page */
-        cache.pt[ptIndex] = physicalAddress | PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE;
+        pdptIndex = getPagemapIndex(virtualAddress, 3);
+        if (pdptIndex != cache.pdptIndex) {
+            cache.pdptIndex = pdptIndex;
+            cache.pdIndex = PAGEMAP_INDEX_INVALID;
+            cache.pd = getNextLevel(cache.pdpt, pdptIndex);
+            if (cache.pd == NULL) {
+                return STATUS_ALLOCATION_FAILED;
+            }
+        }
+
+        pdIndex = getPagemapIndex(virtualAddress, 2);
+
+        /* Map huge page (2 MiB) */
+        if ((virtualAddress % HUGE_PAGE_SIZE) == 0 &&
+            pageCount >= HUGE_PAGE_PAGES) {
+            consoleDebug(L"Mapping huge page at 0x%x...\r\n", virtualAddress);
+            cache.pd[pdIndex] = entryFlags | physicalAddress | PAGEMAP_ENTRY_PAGE_SIZE;
+            physicalAddress += HUGE_PAGE_SIZE;
+            virtualAddress += HUGE_PAGE_SIZE;
+            pageCount -= HUGE_PAGE_PAGES;
+            continue;
+        }
+
+        if (pdIndex != cache.pdIndex) {
+            cache.pdIndex = pdIndex;
+            cache.pt = getNextLevel(cache.pd, pdIndex);
+            if (cache.pt == NULL) {
+                return STATUS_ALLOCATION_FAILED;
+            }
+        }
+
+        /* Map single page (4 KiB) */
+        ptIndex = getPagemapIndex(virtualAddress, 1);
+        cache.pt[ptIndex] = entryFlags | physicalAddress;
         physicalAddress += PAGE_SIZE;
         virtualAddress += PAGE_SIZE;
+        pageCount--;
     }
 
     return STATUS_SUCCESS;

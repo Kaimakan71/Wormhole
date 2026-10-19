@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
     uint64 physicalAddress;
     uint64 virtualAddress;
-    uintn pageCount;
+    uint64 pageCount;
     uint8 type;
 } MemoryRegion;
 
