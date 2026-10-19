@@ -9,8 +9,11 @@
 #include <console.h>
 #include <cpu.h>
 #include <log.h>
+#include <mm.h>
 
 void kernelMain(BootInfo *bootInfo) {
+    Status status;
+
     if (bootInfo->signature != BOOT_INFO_SIGNATURE) {
         return;
     }
@@ -19,6 +22,12 @@ void kernelMain(BootInfo *bootInfo) {
 
     consoleInitialize(&bootInfo->fb);
     logWrite("Starting kernel...\n");
+
+    status = mmInitialize(bootInfo->memoryRegions, bootInfo->memoryRegionCount);
+    if (!STATUS_IS_SUCCESS(status)) {
+        logError("Failed to initialize memory manager\n");
+        return;
+    }
 
     logWrite("Goodbye!\n");
     cpuHang();

@@ -83,7 +83,7 @@ void efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn
     EfiMemoryDescriptor *desc;
     uint8 type;
 
-    region = regions;
+    region = regions - 1;
     regionCount = 0;
 
     desc = &map[0];
