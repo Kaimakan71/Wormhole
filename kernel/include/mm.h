@@ -28,3 +28,5 @@ static inline uintn virtToPhys(void *virt) {
 Status mmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount);
 
 Status pmmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount);
+Status pmmAllocate(uintn pageCount, uintn *physicalAddress);
+void pmmFree(uintn physicalAddress, uintn pageCount);

@@ -22,6 +22,7 @@
 
 static uintn bitmapWords;
 static uintn *bitmap;
+static uintn totalPages;
 
 static inline void bitmapSet(uintn idx) {
     SET_BIT(bitmap[idx >> BITMAP_WORD_SHIFT], BIT(idx & (BITMAP_WORD_SIZE - 1)));
@@ -31,22 +32,63 @@ static inline void bitmapClear(uintn idx) {
     CLEAR_BIT(bitmap[idx >> BITMAP_WORD_SHIFT], BIT(idx & (BITMAP_WORD_SIZE - 1)));
 }
 
-static intn bitmapFfs() {
-    uintn word;
+static void markUsed(uintn start, uintn count) {
+    uintn idx, word;
 
-    for (uintn w = 0; w < bitmapWords; w++) {
-        word = bitmap[w];
-        if (word != 0) {
-            return (w * BITMAP_WORD_SIZE) + ctz(word);
-        }
+    /* Align to word size */
+    idx = start;
+    while (idx % BITMAP_WORD_SIZE && count) {
+        bitmapClear(idx);
+        idx++;
+        count--;
     }
 
-    return -1;
+    /* Set words */
+    word = idx >> BITMAP_WORD_SHIFT;
+    while (count >= BITMAP_WORD_SIZE) {
+        bitmap[word++] = 0;
+        count -= BITMAP_WORD_SIZE;
+    }
+    idx = word << BITMAP_WORD_SHIFT;
+
+    /* Finish up remainder */
+    while (count) {
+        bitmapClear(idx);
+        idx++;
+        count--;
+    }
+}
+
+static void markFree(uintn start, uintn count) {
+    uintn idx, word;
+
+    /* Align to word size */
+    idx = start;
+    while (idx % BITMAP_WORD_SIZE && count) {
+        bitmapSet(idx);
+        idx++;
+        count--;
+    }
+
+    /* Set words */
+    word = idx >> BITMAP_WORD_SHIFT;
+    while (count >= BITMAP_WORD_SIZE) {
+        bitmap[word++] = ~0;
+        count -= BITMAP_WORD_SIZE;
+    }
+    idx = word << BITMAP_WORD_SHIFT;
+
+    /* Finish up remainder */
+    while (count) {
+        bitmapSet(idx);
+        idx++;
+        count--;
+    }
 }
 
 Status pmmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount) {
     MemoryRegion *region;
-    uintn totalPages, top, bitmapPages;
+    uintn top, bitmapPages;
 
     traceDebug("Initializing PMM...\n");
 
@@ -85,5 +127,50 @@ Status pmmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount) {
         bitmap[w] = 0;
     }
 
+    /* Final iteration to mark free regions */
+    region = &memoryRegions[0];
+    for (uintn r = 0; r < memoryRegionCount; r++) {
+        if (region->type == MEMORY_TYPE_FREE) {
+            markFree(region->physicalAddress >> PAGE_SHIFT, region->pageCount);
+        }
+
+        region++;
+    }
+
     return STATUS_SUCCESS;
+}
+
+Status pmmAllocate(uintn pageCount, uintn *physicalAddress) {
+    uintn start;
+    intn found;
+
+    /* Locate free pages */
+    found = -1;
+    for (uintn p = 0; p < totalPages; p++) {
+        if (bitmap[p >> BITMAP_WORD_SHIFT] & BIT(p & (BITMAP_WORD_SIZE - 1))) {
+            if (found < 0) {
+                start = p;
+                found = 0;
+            }
+
+            found++;
+            if ((uintn) found >= pageCount) {
+                break;
+            }
+        } else {
+            found = -1;
+        }
+    }
+    if (found < 0 || (uintn) found != pageCount) {
+        return STATUS_ALLOCATION_FAILED;
+    }
+
+    markUsed(start, pageCount);
+
+    *physicalAddress = start << PAGE_SHIFT;
+    return STATUS_SUCCESS;
+}
+
+void pmmFree(uintn physicalAddress, uintn pageCount) {
+    markFree(physicalAddress >> PAGE_SHIFT, pageCount);
 }
