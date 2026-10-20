@@ -110,7 +110,6 @@ Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) 
         /* Map huge page (2 MiB) */
         if ((virtualAddress % HUGE_PAGE_SIZE) == 0 &&
             pageCount >= HUGE_PAGE_PAGES) {
-            consoleDebug(L"Mapping huge page at 0x%x...\r\n", virtualAddress);
             cache.pd[pdIndex] = entryFlags | physicalAddress | PAGEMAP_ENTRY_PAGE_SIZE;
             physicalAddress += HUGE_PAGE_SIZE;
             virtualAddress += HUGE_PAGE_SIZE;

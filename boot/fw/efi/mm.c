@@ -6,6 +6,7 @@
  */
 
 #include <bootmm.h>
+#include <cpu/mm.h>
 #include "bootefi.h"
 
 static inline bool shouldMap(uint64 start, uint64 pageCount, EfiMemoryType memoryType, uintn stack) {
@@ -117,7 +118,7 @@ void efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn
 Status mmFwInitialize() {
     Status status;
     EfiMemoryDescriptor *map, *desc;
-    uintn mapSize, mapKey, descriptorSize, stack;
+    uintn mapSize, mapKey, descriptorSize, stack, top, totalPages;
     uint32 descriptorVersion;
 
     status = efiStatusToStatus(efiGetMemoryMap(&map, &mapSize, &mapKey, &descriptorSize, &descriptorVersion));
@@ -126,9 +127,17 @@ Status mmFwInitialize() {
         return status;
     }
 
+    /* Map self */
+    consoleDebug(L"Mapping self...\r\n");
     desc = map;
     stack = mmArchGetStack();
+    totalPages = 0;
     for (uintn d = 0; d < (mapSize / descriptorSize); d++) {
+        top = (desc->physicalStart >> PAGE_SHIFT) + desc->pageCount;
+        if (top > totalPages) {
+            totalPages = top;
+        }
+
         if (shouldMap(desc->physicalStart, desc->pageCount, (EfiMemoryType) desc->type, stack)) {
             status = mmMapPages(desc->physicalStart, desc->physicalStart, desc->pageCount);
             if (!STATUS_IS_SUCCESS(status)) {
@@ -140,8 +149,16 @@ Status mmFwInitialize() {
 
         desc = (EfiMemoryDescriptor *) ((uintn) desc + descriptorSize);
     }
-
     mmHeapFree(map);
+
+    /* Map all physical memory */
+    consoleDebug(L"Mapping HHDM...\r\n");
+    status = mmMapPages(HHDM_BASE, 0, totalPages);
+    if (!STATUS_IS_SUCCESS(status)) {
+        consoleError(L"Failed to map %u page(s) for HHDM\r\n", totalPages);
+        return status;
+    }
+
     return STATUS_SUCCESS;
 }
 
