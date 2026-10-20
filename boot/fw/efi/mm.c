@@ -127,8 +127,8 @@ Status mmFwInitialize() {
         return status;
     }
 
-    /* Map self */
-    consoleDebug(L"Mapping self...\r\n");
+    /* Map the boot manager itself */
+    consoleDebug(L"Mapping boot manager...\r\n");
     desc = map;
     stack = mmArchGetStack();
     totalPages = 0;
@@ -151,7 +151,7 @@ Status mmFwInitialize() {
     }
     mmHeapFree(map);
 
-    /* Map all physical memory */
+    /* Map all physical memory (HHDM) */
     consoleDebug(L"Mapping HHDM...\r\n");
     status = mmMapPages(HHDM_BASE, 0, totalPages);
     if (!STATUS_IS_SUCCESS(status)) {

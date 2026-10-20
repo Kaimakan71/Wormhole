@@ -17,6 +17,7 @@ Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount) {
 
     consoleDebug(L"Exiting firmware environment...\r\n");
 
+    /* Shut down boot-exclusive services */
     fsShutdown();
     efiCloseProtocol(efiImageHandle, &efiLoadedImageProtocol);
 

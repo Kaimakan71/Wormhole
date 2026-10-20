@@ -38,6 +38,7 @@ static PagemapEntry *getNextLevel(PagemapEntry *table, uint16 index) {
 
     entry = table[index];
     if (entry & PAGEMAP_ENTRY_PRESENT) {
+        /* Return existing table */
         return (PagemapEntry *) (entry & PAGEMAP_ENTRY_ADDRESS_MASK);
     }
 
@@ -51,6 +52,7 @@ static PagemapEntry *getNextLevel(PagemapEntry *table, uint16 index) {
         newTable[e] = 0;
     }
 
+    /* Map new table in previous level */
     table[index] = (uintn) newTable | PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE;
 
     return newTable;
@@ -107,9 +109,9 @@ Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) 
 
         pdIndex = getPagemapIndex(virtualAddress, 2);
 
-        /* Map huge page (2 MiB) */
         if ((virtualAddress % HUGE_PAGE_SIZE) == 0 &&
             pageCount >= HUGE_PAGE_PAGES) {
+            /* Map huge page (2 MiB) */
             cache.pd[pdIndex] = entryFlags | physicalAddress | PAGEMAP_ENTRY_PAGE_SIZE;
             physicalAddress += HUGE_PAGE_SIZE;
             virtualAddress += HUGE_PAGE_SIZE;

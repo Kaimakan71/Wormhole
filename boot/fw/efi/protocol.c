@@ -23,6 +23,7 @@ EfiStatus efiOpenProtocol(EfiHandle handle, const EfiGuid *protocol, void **inte
         );
     }
 
+    /* Fall back to legacy EFI 1.0 method */
     return efiBootServices->handleProtocol(
         handle,
         (EfiGuid *) protocol,
@@ -40,6 +41,7 @@ EfiStatus efiCloseProtocol(EfiHandle handle, const EfiGuid *protocol) {
         );
     }
 
+    /* Legacy EFI doesn't track protocol references */
     return EFI_STATUS_SUCCESS;
 }
 
@@ -87,6 +89,7 @@ EfiStatus efiLocateProtocol(const EfiGuid *protocol, void **interface) {
         return efiBootServices->locateProtocol((EfiGuid *) protocol, NULL, interface);
     }
 
+    /* Get the first available handle */
     status = efiLocateHandle(protocol, &handles);
     if (status != EFI_STATUS_SUCCESS) {
         return status;
