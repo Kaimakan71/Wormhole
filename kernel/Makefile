@@ -18,7 +18,7 @@ export CFILES = $(addprefix ../common/,string8.c)
 
 include $(ARCH_DIR)/kernel/build.mk
 
-export CFILES += $(addprefix mm/,pmm.c mm.c) console.c log.c main.c
+export CFILES += $(addprefix mm/,pmm.c heap.c mm.c) console.c log.c main.c
 
 .PHONY: all
 all: $(BUILD_DIR)/$(ELF_NAME)

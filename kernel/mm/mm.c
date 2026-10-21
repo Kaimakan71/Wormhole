@@ -20,5 +20,18 @@ Status mmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount) {
         return status;
     }
 
+    status = mmHeapInitialize();
+    if (!STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
     return STATUS_SUCCESS;
+}
+
+void *mmAllocate(uintn size) {
+    return mmHeapAllocate(size);
+}
+
+void mmFree(void *ptr) {
+    mmHeapFree(ptr);
 }
