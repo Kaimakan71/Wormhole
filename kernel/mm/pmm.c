@@ -112,6 +112,8 @@ Status pmmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount) {
     for (uintn r = 0; r < memoryRegionCount; r++) {
         if (region->pageCount >= bitmapPages) {
             bitmap = physToVirt(region->physicalAddress);
+            region->physicalAddress += bitmapPages << PAGE_SHIFT;
+            region->pageCount -= bitmapPages;
             break;
         }
 
