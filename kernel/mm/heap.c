@@ -13,6 +13,20 @@
 #define SLAB_PAGES 16
 #define SLAB_SIZE  (SLAB_PAGES << PAGE_SHIFT)
 
+#define MIN_ORDER 3
+#define MAX_ORDER 8
+
+#define MIN_OBJECT_SIZE BIT(MIN_ORDER)
+#define MAX_OBJECT_SIZE BIT(MAX_ORDER)
+
+#define ORDER_COUNT (MAX_ORDER - MIN_ORDER + 1)
+
+#if CONFIG_64BIT == 1
+    #define clz(w) __builtin_clzll(w)
+#else
+    #define clz(w) __builtin_clz(w)
+#endif
+
 typedef struct {
     union {
         void *nextFree;
@@ -20,7 +34,29 @@ typedef struct {
     };
 } Object;
 
-static Object *testSlab;
+static Object *slabs[ORDER_COUNT];
+
+static inline uintn log2(uintn size) {
+    return (8 * sizeof(uintn)) - clz(size - 1);
+}
+
+static inline void *slabAllocate(Object *slab) {
+    Object *obj;
+
+    obj = slab->nextFree;
+    if (obj == NULL) {
+        return NULL;
+    }
+
+    slab->nextFree = obj->nextFree;
+
+    return obj;
+}
+
+static inline void slabFree(Object *slab, Object *obj) {
+    obj->nextFree = slab->nextFree;
+    slab->nextFree = obj;
+}
 
 static void slabInitialize(Object *slab, uintn objectSize) {
     Object *obj, *next;
@@ -34,51 +70,42 @@ static void slabInitialize(Object *slab, uintn objectSize) {
     obj->nextFree = NULL;
 }
 
-static void *slabAllocate(Object *slab) {
-    Object *obj;
-
-    obj = slab->nextFree;
-    if (obj == NULL) {
-        return NULL;
-    }
-
-    slab->nextFree = obj->nextFree;
-
-    return obj;
-}
-
 Status mmHeapInitialize() {
     Status status;
     uintn phys;
+    Object *slab;
 
     traceDebug("Initializing heap...\n");
 
-    status = pmmAllocate(SLAB_PAGES, &phys);
-    if (!STATUS_IS_SUCCESS(status)) {
-        traceError("Failed to allocate %u page(s) for slab\n", SLAB_PAGES);
-        return status;
-    }
+    for (uintn o = 0; o < ORDER_COUNT; o++) {
+        status = pmmAllocate(SLAB_PAGES, &phys);
+        if (!STATUS_IS_SUCCESS(status)) {
+            traceError("Failed to allocate %u page(s) for slab\n", SLAB_PAGES);
+            return status;
+        }
 
-    testSlab = (Object *) physToVirt(phys);
-    slabInitialize(testSlab, 16);
+        slab = (Object *) physToVirt(phys);
+        slabInitialize(slab, BIT(MIN_ORDER + o));
+        slabs[o] = slab;
+    }
 
     return STATUS_SUCCESS;
 }
 
 void *mmHeapAllocate(uintn size) {
-    (void) size;
+    if (size < MIN_OBJECT_SIZE) {
+        size = MIN_OBJECT_SIZE;
+    }
 
-    /* TODO: Use slab of object size size */
+    if (size > MAX_OBJECT_SIZE) {
+        return NULL;
+    }
 
-    return slabAllocate(testSlab);
+    return slabAllocate(slabs[log2(size) - MIN_ORDER]);
 }
 
 void mmHeapFree(void *ptr) {
-    Object *obj;
+    (void) ptr;
 
     /* TODO: Use slab containing ptr */
-
-    obj = ptr;
-    obj->nextFree = testSlab->nextFree;
-    testSlab->nextFree = obj;
 }
