@@ -1,5 +1,5 @@
 /*
- * EFI display services.
+ * EFI framebuffer services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -9,7 +9,7 @@
 
 static EfiGraphicsOutputProtocol *gop = NULL;
 
-Status displayInitialize(Framebuffer *fb) {
+Status fbInitialize(Framebuffer *fb) {
     Status status;
     EfiGraphicsOutputProtocolMode *mode;
     EfiGraphicsOutputModeInfo *modeInfo;
@@ -50,6 +50,6 @@ Status displayInitialize(Framebuffer *fb) {
     return STATUS_SUCCESS;
 }
 
-void displayShutdown() {
+void fbShutdown() {
 
 }

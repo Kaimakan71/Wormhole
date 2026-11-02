@@ -36,7 +36,7 @@ static const char8 *types[] = {
 };
 
 void trapException(Trapframe *tf) {
-    consoleResetCursor();
+    consoleReset(false);
     logError("Processor exception detected!\n");
     logWrite(
         "%s (code=0x%x)\n"

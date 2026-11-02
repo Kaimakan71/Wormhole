@@ -20,7 +20,7 @@ extern EfiBootServices *efiBootServices;
 extern EfiLoadedImageProtocol *efiLoadedImage;
 
 /*
- * Status code translataion services.
+ * Status code services.
  */
 
 EfiStatus statusToEfiStatus(Status status);

@@ -153,7 +153,7 @@ Status mmFwInitialize() {
 
     /* Map all physical memory (HHDM) */
     consoleDebug(L"Mapping HHDM...\r\n");
-    status = mmMapPages(HHDM_BASE, 0, totalPages);
+    status = mmMapPages(HHDM_OFFSET, 0, totalPages);
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to map %u page(s) for HHDM\r\n", totalPages);
         return status;

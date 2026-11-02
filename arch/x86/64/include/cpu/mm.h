@@ -7,4 +7,4 @@
 
 #pragma once
 
-#define HHDM_BASE 0xffff888000000000
+#define HHDM_OFFSET 0xffff888000000000

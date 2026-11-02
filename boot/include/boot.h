@@ -49,11 +49,11 @@ Status fsLoad(const char16 *path, void **data, uintn *size);
 void fsShutdown();
 
 /*
- * Display services.
+ * Framebuffer services.
  */
 
-Status displayInitialize(Framebuffer *fb);
-void displayShutdown();
+Status fbInitialize(Framebuffer *fb);
+void fbShutdown();
 
 /*
  * Image loading services.

@@ -10,7 +10,6 @@
 #include <bootinfo.h>
 
 void consoleInitialize(Framebuffer *fb);
+void consoleReset(bool clear);
 void consoleSetColor(uint32 color);
-void consoleResetCursor();
-void consoleClear();
 void consoleWrite(const char8 *s);

@@ -1,5 +1,5 @@
 /*
- * Port I/O services.
+ * Port-mapped I/O services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.

@@ -18,11 +18,11 @@
 #define SIZE_TO_PAGES(size) (((size) >> PAGE_SHIFT) + (((size) & PAGE_MASK) ? 1 : 0))
 
 static inline void *physToVirt(uintn phys) {
-    return (void *) (phys + HHDM_BASE);
+    return (void *) (phys + HHDM_OFFSET);
 }
 
 static inline uintn virtToPhys(void *virt) {
-    return (uintn) virt - HHDM_BASE;
+    return (uintn) virt - HHDM_OFFSET;
 }
 
 Status mmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount);

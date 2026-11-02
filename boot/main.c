@@ -8,7 +8,7 @@
 #include <boot.h>
 #include <cpu.h>
 
-#define HEAP_SIZE 0x8000
+#define HEAP_SIZE 0x10000
 
 #define KERNEL_PATH L"\\kernel.elf"
 
@@ -27,7 +27,7 @@ Status libInitialize(BootInfo *bootInfo) {
         return status;
     }
 
-    status = displayInitialize(&bootInfo->fb);
+    status = fbInitialize(&bootInfo->fb);
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
     }
@@ -36,7 +36,7 @@ Status libInitialize(BootInfo *bootInfo) {
 }
 
 void libShutdown() {
-    displayShutdown();
+    fbShutdown();
     fsShutdown();
     mmShutdown();
 }

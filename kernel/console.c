@@ -14,10 +14,10 @@
 #define PIXEL(fb, x, y) ((fb)->base + ((y) * (fb)->pitch) + (x))
 
 static Framebuffer *fb = NULL;
-static uint32 fg = DEFAULT_FG;
-static uint32 bg = DEFAULT_BG;
-static uint32 cursorX = 0;
-static uint32 cursorY = 0;
+static uint32 fg;
+static uint32 bg;
+static uint32 cursorX;
+static uint32 cursorY;
 
 static void writeCharacter(char8 c) {
     uint8 *src;
@@ -43,35 +43,31 @@ static void writeCharacter(char8 c) {
 
 void consoleInitialize(Framebuffer *newFb) {
     fb = newFb;
-    consoleClear();
+    consoleReset(true);
+}
+
+void consoleReset(bool clear) {
+    uint32 *line;
+
+    fg = DEFAULT_FG;
+    bg = DEFAULT_BG;
+    cursorX = 0;
+    cursorY = 0;
+
+    if (clear && fb != NULL) {
+        line = PIXEL(fb, 0, 0);
+        for (uint32 y = 0; y < fb->height; y++) {
+            for (uint32 x = 0; x < fb->width; x++) {
+                line[x] = bg;
+            }
+
+            line += fb->pitch;
+        }
+    }
 }
 
 void consoleSetColor(uint32 color) {
     fg = color;
-}
-
-void consoleResetCursor() {
-    cursorX = 0;
-    cursorY = 0;
-}
-
-void consoleClear() {
-    uint32 *line;
-
-    if (fb == NULL) {
-        return;
-    }
-
-    line = PIXEL(fb, 0, 0);
-    for (uint32 y = 0; y < fb->height; y++) {
-        for (uint32 x = 0; x < fb->width; x++) {
-            line[x] = bg;
-        }
-
-        line += fb->pitch;
-    }
-
-    consoleResetCursor();
 }
 
 void consoleWrite(const char8 *s) {
