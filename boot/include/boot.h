@@ -53,7 +53,6 @@ void fsShutdown();
  */
 
 Status fbInitialize(Framebuffer *fb);
-void fbShutdown();
 
 /*
  * Image loading services.

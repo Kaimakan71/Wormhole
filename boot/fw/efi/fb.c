@@ -49,7 +49,3 @@ Status fbInitialize(Framebuffer *fb) {
 
     return STATUS_SUCCESS;
 }
-
-void fbShutdown() {
-
-}

@@ -36,7 +36,6 @@ Status libInitialize(BootInfo *bootInfo) {
 }
 
 void libShutdown() {
-    fbShutdown();
     fsShutdown();
     mmShutdown();
 }

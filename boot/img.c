@@ -7,27 +7,9 @@
 
 #include <boot.h>
 #include <elf.h>
+#include <memory.h>
 
 #define PTR_OFFSET(ptr, off) ((void *) ((uintn) (ptr) + (off)))
-
-static inline void memCopy(void *dest, void *src, uintn n) {
-    uint8 *d, *s;
-
-    d = dest;
-    s = src;
-    while (n--) {
-        *d++ = *s++;
-    }
-}
-
-static inline void memClear(void *dest, uintn n) {
-    uint8 *d;
-
-    d = dest;
-    while (n--) {
-        *d++ = 0;
-    }
-}
 
 static bool validateHeader(const ElfImageHeader *hdr) {
     if (hdr->magic != ELF_MAGIC) {
