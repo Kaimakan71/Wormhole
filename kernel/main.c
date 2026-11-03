@@ -6,10 +6,20 @@
  */
 
 #include <bootinfo.h>
+#include <bus/pci.h>
 #include <console.h>
 #include <cpu.h>
 #include <log.h>
 #include <mm.h>
+
+static void printPciDevice(const PciDevice *dev) {
+    logDebug("%8x:%8x.%8u: %s: %16x:%16x\n",
+        dev->bus, dev->device, dev->function,
+        pciGetClassString(dev->class, dev->subclass),
+        dev->vendorId,
+        dev->deviceId
+    );
+}
 
 void kernelMain(BootInfo *bootInfo) {
     Status status;
@@ -28,6 +38,9 @@ void kernelMain(BootInfo *bootInfo) {
         logError("Failed to initialize memory manager\n");
         return;
     }
+
+    pciInitialize();
+    pciEnumerateDevices(printPciDevice);
 
     logWrite("Goodbye!\n");
     cpuHang();

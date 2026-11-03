@@ -10,7 +10,7 @@ export ELF_NAME = kernel.elf
 export CC = clang
 export LD = ld.lld
 
-export CFLAGS += -Iinclude -I../common/include -I$(ARCH_DIR)/include -target $(TOOLCHAIN_ARCH)-unknown-elf -mcmodel=kernel
+export CFLAGS += -Iinclude -I../common/include -I$(ARCH_DIR)/include -I../drivers/include -target $(TOOLCHAIN_ARCH)-unknown-elf -mcmodel=kernel
 export LDFLAGS += -T$(ARCH_DIR)/kernel/link.lds -zmax-page-size=0x1000
 
 export SFILES =
@@ -18,7 +18,11 @@ export CFILES = $(addprefix ../common/,string8.c)
 
 include $(ARCH_DIR)/kernel/build.mk
 
-export CFILES += $(addprefix mm/,pmm.c heap.c mm.c) console.c log.c main.c
+export CFILES +=                                     \
+	console.c log.c                                  \
+	$(addprefix mm/,pmm.c heap.c mm.c)               \
+	$(addprefix ../drivers/bus/pci/,strings.c pci.c) \
+	main.c
 
 .PHONY: all
 all: $(BUILD_DIR)/$(ELF_NAME)
