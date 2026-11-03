@@ -65,7 +65,7 @@ typedef struct __packed {
 
 void trapException(Trapframe *tf);
 
-#define DECLARE_ISR(vector) extern void isr##vector(void);
+#define DECLARE_ISR(vector) extern void isr##vector();
 ENUM_EXCEPT_VECTORS(DECLARE_ISR);
 
 #endif

@@ -140,39 +140,43 @@ Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) 
 
 Status mmGetPhysicalAddress(uintn virtualAddress, uintn *physicalAddress) {
     PagemapEntry *pdpt, *pd, *pt, pml4Entry, pdptEntry, pdEntry, ptEntry;
-    uint16 pageOff, pml4Index, pdptIndex, pdIndex, ptIndex;
+    uint16 pageOff;
 
     pageOff = virtualAddress & PAGE_MASK;
     virtualAddress &= ~PAGE_MASK;
-    pml4Index = getPagemapIndex(virtualAddress, 4);
-    pdptIndex = getPagemapIndex(virtualAddress, 3);
-    pdIndex = getPagemapIndex(virtualAddress, 2);
-    ptIndex = getPagemapIndex(virtualAddress, 1);
 
-    pml4Entry = pml4[pml4Index];
+    pml4Entry = pml4[getPagemapIndex(virtualAddress, 4)];
     pdpt = (PagemapEntry *) (pml4Entry & PAGEMAP_ENTRY_ADDRESS_MASK);
     if (!(pml4Entry & PAGEMAP_ENTRY_PRESENT)) {
         return STATUS_NOT_FOUND;
     }
 
-    pdptEntry = pdpt[pdptIndex];
+    pdptEntry = pdpt[getPagemapIndex(virtualAddress, 3)];
     pd = (PagemapEntry *) (pdptEntry & PAGEMAP_ENTRY_ADDRESS_MASK);
     if (!(pdptEntry & PAGEMAP_ENTRY_PRESENT)) {
         return STATUS_NOT_FOUND;
     }
 
-    pdEntry = pd[pdIndex];
+    pdEntry = pd[getPagemapIndex(virtualAddress, 2)];
     pt = (PagemapEntry *) (pdEntry & PAGEMAP_ENTRY_ADDRESS_MASK);
     if (!(pdEntry & PAGEMAP_ENTRY_PRESENT)) {
         return STATUS_NOT_FOUND;
     }
 
-    ptEntry = pt[ptIndex];
+    if (pdEntry & PAGEMAP_ENTRY_PAGE_SIZE) {
+        /* Mapped as huge page (2 MiB) */
+        *physicalAddress = (pdEntry & PAGEMAP_ENTRY_ADDRESS_MASK) | pageOff;
+        return STATUS_SUCCESS;
+    }
+
+    ptEntry = pt[getPagemapIndex(virtualAddress, 1)];
     if (!(ptEntry & PAGEMAP_ENTRY_PRESENT)) {
         return STATUS_NOT_FOUND;
     }
 
+    /* Mapped as single page (4 KiB) */
     *physicalAddress = (ptEntry & PAGEMAP_ENTRY_ADDRESS_MASK) | pageOff;
+
     return STATUS_SUCCESS;
 }
 
