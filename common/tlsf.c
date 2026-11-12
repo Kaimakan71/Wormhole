@@ -5,6 +5,7 @@
  * Provided under the BSD 3-Clause license.
  */
 
+#include <memory.h>
 #include <tlsf.h>
 
 #if CONFIG_64BIT == 1
@@ -450,8 +451,7 @@ void *tlsfResize(void *tlsf, void *ptr, uintn size) {
             return NULL;
         }
 
-        /* TODO: Copy over old data */
-        /* memcpy(newPtr, ptr, min(curSize, size)); */
+        memMove(newPtr, ptr, min(curSize, size));
         tlsfFree(tlsf, ptr);
 
         return newPtr;

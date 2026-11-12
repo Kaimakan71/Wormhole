@@ -31,3 +31,8 @@ static inline void memCopy(void *dest, void *src, uintn count) {
         *d++ = *s++;
     }
 }
+
+static inline void memMove(void *dest, void *src, uintn count) {
+    /* TODO: Handle overlap */
+    memCopy(dest, src, count);
+}
