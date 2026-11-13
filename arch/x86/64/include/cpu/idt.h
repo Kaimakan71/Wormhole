@@ -33,4 +33,5 @@ typedef struct __packed {
     uint64 base;
 } Idtr;
 
+void idtSetVector(uint8 vector, uint64 offset, uint8 ist, uint8 type, uint8 dpl);
 void idtInitialize();

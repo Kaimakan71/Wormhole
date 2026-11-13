@@ -8,8 +8,16 @@
 #include <cpu.h>
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
+#include <cpu/i8042.h>
+#include <cpu/i8259.h>
 
 void cpuEarlyInitialize() {
     gdtInitialize();
     idtInitialize();
+}
+
+void cpuInitialize() {
+    i8259Initialize();
+    i8042Initialize();
+    cpuIntEnable();
 }

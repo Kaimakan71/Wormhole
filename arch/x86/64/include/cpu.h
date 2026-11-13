@@ -13,6 +13,7 @@
 
 #define __cacheline_aligned __align(CACHE_LINE_SIZE)
 
+#define cpuHalt()       ASMV("hlt")
 #define cpuIntEnable()  ASMV("sti")
 #define cpuIntDisable() ASMV("cli")
 
@@ -42,3 +43,4 @@ static inline void cpuSetCr3(uint64 cr3) {
 }
 
 void cpuEarlyInitialize();
+void cpuInitialize();

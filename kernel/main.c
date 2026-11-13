@@ -12,6 +12,10 @@
 #include <log.h>
 #include <mm.h>
 
+static void driversInitialize() {
+    pciInitialize();
+}
+
 void kernelMain(BootInfo *bootInfo) {
     Status status;
 
@@ -30,8 +34,12 @@ void kernelMain(BootInfo *bootInfo) {
         return;
     }
 
-    pciInitialize();
+    cpuInitialize();
 
-    logWrite("Goodbye!\n");
-    cpuHang();
+    driversInitialize();
+
+    logWrite("Halting...\n");
+    for (;;) {
+        cpuHalt();
+    }
 }

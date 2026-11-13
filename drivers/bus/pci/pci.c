@@ -105,7 +105,7 @@ static void scanBus(uint8 bus) {
 }
 
 void pciInitialize() {
-    traceDebug("Initializing PCI...\n");
+    traceDebug("Initializing PCI driver...\n");
 
     listReset(&devices);
     scanBus(0);

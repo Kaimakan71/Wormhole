@@ -12,36 +12,32 @@
 
 #define IDT_ENTRY_COUNT 256
 
-#define IDT_ENTRY(_offset, _segment, _ist, _type, _dpl) { \
-    .offsetLow  = (_offset) & 0xffff,                     \
-    .segment    = (_segment),                             \
-    .ist        = (_ist),                                 \
-    .reserved0  = 0,                                      \
-    .type       = (_type),                                \
-    .reserved1  = 0,                                      \
-    .dpl        = (_dpl),                                 \
-    .present    = 1,                                      \
-    .offsetMid  = ((_offset) >> 16) & 0xffff,             \
-    .offsetHigh = (_offset) >> 32,                        \
-    .reserved2  = 0,                                      \
-}
-
-static __cacheline_aligned IdtEntry idt[IDT_ENTRY_COUNT] = {
-    #define MAKE_EXCEPTION_ENTRY(vector) IDT_ENTRY(0ULL, KERNEL_CS, 0, IDT_ENTRY_TYPE_32BIT | IDT_ENTRY_TYPE_TRAP, 0),
-    ENUM_EXCEPT_VECTORS(MAKE_EXCEPTION_ENTRY)
-};
+static __cacheline_aligned IdtEntry idt[IDT_ENTRY_COUNT];
 
 static const Idtr idtr = {
     .limit = sizeof(idt) - 1,
     .base  = (uint64) &idt[0],
 };
 
+void idtSetVector(uint8 vector, uint64 offset, uint8 ist, uint8 type, uint8 dpl) {
+    IdtEntry *entry;
+
+    entry = &idt[vector];
+    entry->offsetLow = offset & 0xffff;
+    entry->segment = KERNEL_CS;
+    entry->ist = ist;
+    entry->reserved0 = 0;
+    entry->type = type | IDT_ENTRY_TYPE_32BIT;
+    entry->reserved1 = 0;
+    entry->dpl = dpl;
+    entry->present = 1;
+    entry->offsetMid = (offset >> 16) & 0xffff;
+    entry->offsetHigh = offset >> 32;
+    entry->reserved2 = 0;
+}
+
 void idtInitialize() {
-    #define INIT_EXCEPTION_ENTRY(vector) {                               \
-        idt[vector].offsetLow  = (uint64) (isr##vector) & 0xffff;        \
-        idt[vector].offsetMid = ((uint64) (isr##vector) >> 16) & 0xffff; \
-        idt[vector].offsetHigh  = (uint64) (isr##vector) >> 32;          \
-    }
+    #define INIT_EXCEPTION_ENTRY(vector) idtSetVector(vector, (uint64) isr##vector, 0, IDT_ENTRY_TYPE_TRAP, 0);
     ENUM_EXCEPT_VECTORS(INIT_EXCEPTION_ENTRY);
 
     ASMV("lidt %0" : : "m" (idtr) : "memory");
