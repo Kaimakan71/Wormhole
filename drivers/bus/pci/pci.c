@@ -66,7 +66,7 @@ static void scanFunction(uint8 bus, uint8 slot, uint8 function) {
         return;
     }
 
-    dev = mmAllocate(sizeof(*dev));
+    dev = heapAllocate(sizeof(*dev));
     if (dev == NULL) {
         traceError("Failed to allocate memory for device descriptor\n");
         return;
