@@ -20,7 +20,7 @@ include $(ARCH_DIR)/kernel/build.mk
 
 export CFILES +=                                     \
 	console.c log.c                                  \
-	$(addprefix mm/,pmm.c heap.c mm.c)               \
+	$(addprefix mm/,pmm.c vmm.c heap.c mm.c)         \
 	$(addprefix ../drivers/bus/pci/,strings.c pci.c) \
 	main.c
 

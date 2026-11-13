@@ -1,5 +1,5 @@
 /*
- * Memory manager services.
+ * Memory management services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -27,15 +27,27 @@ static inline uintn virtToPhys(void *virt) {
 }
 
 Status mmInitialize(BootMemoryRegion *memoryRegions, uintn memoryRegionCount);
-void *mmAllocate(uintn size);
-void mmFree(void *ptr);
 
 Status pmmInitialize(BootMemoryRegion *memoryRegions, uintn memoryRegionCount);
-Status pmmAllocate(uintn pageCount, uint64 *physicalAddress);
-void pmmFree(uint64 physicalAddress, uintn pageCount);
+Status pmmAllocatePages(uintn pageCount, uint64 *physicalAddress);
+void pmmFreePages(uint64 physicalAddress, uintn pageCount);
 void *pmmGetOwner(uint64 physicalAddress);
 void pmmSetOwner(uint64 physicalAddress, void *owner);
 
-Status mmHeapInitialize();
-void *mmHeapAllocate(uintn size);
-void mmHeapFree(void *ptr);
+Status vmmAllocatePages(uintn pageCount, void **ptr);
+
+static inline void vmmFreePages(void *ptr, uintn pageCount) {
+    pmmFreePages(virtToPhys(ptr), pageCount);
+}
+
+static inline void *vmmGetOwner(void *ptr) {
+    return pmmGetOwner(virtToPhys(ptr));
+}
+
+static inline void vmmSetOwner(void *ptr, void *owner) {
+    pmmSetOwner(virtToPhys(ptr), owner);
+}
+
+Status heapInitialize();
+void *heapAllocate(uintn size);
+void heapFree(void *ptr);

@@ -1,5 +1,5 @@
 /*
- * Physical memory manager services.
+ * Physical memory management services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -130,7 +130,7 @@ Status pmmInitialize(BootMemoryRegion *bootRegions, uintn bootRegionCount) {
     return STATUS_SUCCESS;
 }
 
-Status pmmAllocate(uintn pageCount, uint64 *physicalAddress) {
+Status pmmAllocatePages(uintn pageCount, uint64 *physicalAddress) {
     ListItem *listItem;
     MemoryRegion *region, *marginRegion;
     uint64 marginPageCount, marginStart;
@@ -170,7 +170,7 @@ Status pmmAllocate(uintn pageCount, uint64 *physicalAddress) {
     return STATUS_ALLOCATION_FAILED;
 }
 
-void pmmFree(uint64 physicalAddress, uintn pageCount) {
+void pmmFreePages(uint64 physicalAddress, uintn pageCount) {
     MemoryRegion *region;
 
     region = pmmGetRegion(physicalAddress);

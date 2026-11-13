@@ -70,22 +70,20 @@ static void slabInitialize(Object *slab, uintn objectSize) {
     obj->nextFree = NULL;
 }
 
-Status mmHeapInitialize() {
+Status heapInitialize() {
     Status status;
-    uintn phys;
     Object *slab;
 
     traceDebug("Initializing heap...\n");
 
     for (uintn o = 0; o < ORDER_COUNT; o++) {
-        status = pmmAllocate(SLAB_PAGES, &phys);
+        status = vmmAllocatePages(SLAB_PAGES, (void **) &slab);
         if (!STATUS_IS_SUCCESS(status)) {
             traceError("Failed to allocate %u page(s) for slab\n", SLAB_PAGES);
             return status;
         }
 
-        slab = (Object *) physToVirt(phys);
-        pmmSetOwner(phys, slab);
+        vmmSetOwner(slab, slab);
         slabInitialize(slab, BIT(MIN_ORDER + o));
         slabs[o] = slab;
     }
@@ -93,22 +91,23 @@ Status mmHeapInitialize() {
     return STATUS_SUCCESS;
 }
 
-void *mmHeapAllocate(uintn size) {
+void *heapAllocate(uintn size) {
     if (size < MIN_OBJECT_SIZE) {
         size = MIN_OBJECT_SIZE;
     }
 
     if (size > MAX_OBJECT_SIZE) {
+        /* TODO: Fall back to page allocator */
         return NULL;
     }
 
     return slabAllocate(slabs[log2(size) - MIN_ORDER]);
 }
 
-void mmHeapFree(void *ptr) {
+void heapFree(void *ptr) {
     Object *slab;
 
-    slab = pmmGetOwner(virtToPhys(ptr));
+    slab = vmmGetOwner(ptr);
     if (slab != NULL) {
         slabFree(slab, ptr);
     }

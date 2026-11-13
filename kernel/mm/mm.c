@@ -1,5 +1,5 @@
 /*
- * Memory manager services.
+ * Memory management services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -20,18 +20,10 @@ Status mmInitialize(BootMemoryRegion *memoryRegions, uintn memoryRegionCount) {
         return status;
     }
 
-    status = mmHeapInitialize();
+    status = heapInitialize();
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
     }
 
     return STATUS_SUCCESS;
-}
-
-void *mmAllocate(uintn size) {
-    return mmHeapAllocate(size);
-}
-
-void mmFree(void *ptr) {
-    mmHeapFree(ptr);
 }
