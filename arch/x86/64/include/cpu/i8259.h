@@ -28,11 +28,9 @@
 #define I8259_ICW4_BUF_MASTER BIT(3)
 #define I8259_ICW4_SFNM       BIT(4)
 
-#define I8259_CASCADE_IRQ 2
-
-#define I8259_VECTOR_OFFSET 0x20
-
 #define I8259_SLAVE_OFFSET 8
+
+#define I8259_CASCADE_IRQ 2
 
 void i8259Initialize();
 void i8259Unmask(uint8 irq);

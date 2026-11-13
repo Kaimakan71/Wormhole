@@ -1,5 +1,5 @@
 /*
- * i8042 keyboard controller driver.
+ * i8042 PS/2 controller driver.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -75,7 +75,7 @@ static __interrupt void i8042KeyboardIsr(void *trapframe) {
 void i8042Initialize() {
     uint8 config;
 
-    traceDebug("Initializing i8042 driver...\n");
+    traceDebug("Initializing PS/2 controller...\n");
 
     /* Disable ports and flush old data */
     i8042Command(I8042_COMMAND_DISABLE_PORT_A);
@@ -101,7 +101,7 @@ void i8042Initialize() {
     i8042Command(I8042_COMMAND_ENABLE_PORT_B);
 
     /* Register ISR */
-    idtSetVector(I8259_VECTOR_OFFSET + I8042_KEYBOARD_IRQ, (uint64) i8042KeyboardIsr, 0, IDT_ENTRY_TYPE_INTERRUPT, 0);
+    idtSetVector(I8042_KEYBOARD_IRQ + IDT_IRQ_OFFSET, (uint64) i8042KeyboardIsr, 0, IDT_ENTRY_TYPE_INTERRUPT, 0);
     i8259Unmask(I8042_KEYBOARD_IRQ);
 
     /* Enable interrupts */

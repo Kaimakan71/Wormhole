@@ -1,5 +1,5 @@
 /*
- * i8042 keyboard controller driver.
+ * i8042 PS/2 controller driver.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.

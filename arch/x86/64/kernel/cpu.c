@@ -9,6 +9,7 @@
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
 #include <cpu/i8042.h>
+#include <cpu/i8253.h>
 #include <cpu/i8259.h>
 
 void cpuEarlyInitialize() {
@@ -18,6 +19,7 @@ void cpuEarlyInitialize() {
 
 void cpuInitialize() {
     i8259Initialize();
+    i8253Initialize();
     i8042Initialize();
     cpuIntEnable();
 }

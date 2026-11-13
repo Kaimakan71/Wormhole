@@ -14,6 +14,8 @@
 #define IDT_ENTRY_TYPE_TRAP      7
 #define IDT_ENTRY_TYPE_32BIT     BIT(3)
 
+#define IDT_IRQ_OFFSET 0x20
+
 typedef struct __packed {
     uint16 offsetLow;
     uint16 segment;
