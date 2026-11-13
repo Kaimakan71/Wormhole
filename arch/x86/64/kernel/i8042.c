@@ -5,6 +5,7 @@
  * Provided under the BSD 3-Clause license.
  */
 
+#include <console.h>
 #include <cpu/idt.h>
 #include <cpu/i8042.h>
 #include <cpu/i8259.h>
@@ -12,6 +13,17 @@
 #include <log.h>
 
 #define TRACE_SOURCE "i8042"
+
+static char8 i8042Keymap[128] = {
+    '\0', '\0', '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0',  '-',  '=',  '\0', '\0',
+    'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',  'o',  'p',  '[',  ']',  '\0', '\0', 'a',  's',
+    'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',  '\'', '`',  '\0', '\\', 'z',  'x',  'c',  'v',
+    'b',  'n',  'm',  ',',  '.',  '/',  '\0', '\0', '\0', ' ',  '\0', '\0', '\0', '\0', '\0', '\0',
+    '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
+    '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
+    '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
+    '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
+};
 
 static inline void i8042WaitRead() {
     while (!(pmioRead8(I8042_STATUS_PORT) & I8042_STATUS_OUTPUT_FULL));
@@ -45,12 +57,17 @@ static void i8042ConfigWrite(uint8 data) {
 }
 
 static __interrupt void i8042KeyboardIsr(void *trapframe) {
-    uint8 scancode;
+    uint8 data;
+    char8 s[2];
 
     (void) trapframe;
 
-    scancode = pmioRead8(I8042_DATA_PORT);
-    traceDebug("Got scancode 0x%8x\n", scancode);
+    data = pmioRead8(I8042_DATA_PORT);
+    if (data < 0x80) {
+        s[0] = i8042Keymap[data];
+        s[1] = '\0';
+        consoleWrite(s);
+    }
 
     i8259Eoi(I8042_KEYBOARD_IRQ);
 }
