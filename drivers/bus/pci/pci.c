@@ -105,8 +105,7 @@ static void scanBus(uint8 bus) {
 }
 
 void pciInitialize() {
-    traceDebug("Initializing PCI driver...\n");
-
+    traceDebug("Discovering devices...\n");
     listReset(&devices);
     scanBus(0);
     if (pciGetHeaderType(0, 0, 0) & PCI_HEADER_TYPE_MULTIFUNCTION) {
@@ -121,12 +120,10 @@ void pciInitialize() {
 }
 
 void pciEnumerateDevices(void (*callback)(const PciDevice *)) {
-    PciDevice *dev;
+    ListItem *listItem;
 
-    dev = (PciDevice *) devices.first;
-    while (dev != (PciDevice *) &devices) {
-        callback(dev);
-        dev = (PciDevice *) dev->listItem.next;
+    listEnumerateItems (&devices, listItem) {
+        callback((PciDevice *) listItem);
     }
 }
 
