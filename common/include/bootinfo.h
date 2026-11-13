@@ -32,7 +32,7 @@ typedef struct {
     uint64 virtualAddress;
     uint64 pageCount;
     uint8 type;
-} MemoryRegion;
+} BootMemoryRegion;
 
 #define BOOT_INFO_SIGNATURE 0x4f464e49544f4f42 /* "BOOTINFO" */
 
@@ -42,5 +42,5 @@ typedef struct {
     Framebuffer fb;
 
     uintn memoryRegionCount;
-    MemoryRegion *memoryRegions;
+    BootMemoryRegion *memoryRegions;
 } BootInfo;

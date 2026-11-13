@@ -64,7 +64,7 @@ Status imageLoad(void *image, uintn imageSize, uintn *entry);
  * Firmware exit services.
  */
 
-Status fwExit(MemoryRegion **memoryRegions, uintn *regionCount);
+Status fwExit(BootMemoryRegion **memoryRegions, uintn *regionCount);
 
 /*
  * Boot library services.

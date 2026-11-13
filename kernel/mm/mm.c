@@ -10,7 +10,7 @@
 
 #define TRACE_SOURCE "mm"
 
-Status mmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount) {
+Status mmInitialize(BootMemoryRegion *memoryRegions, uintn memoryRegionCount) {
     Status status;
 
     traceDebug("Initializing memory manager...\n");

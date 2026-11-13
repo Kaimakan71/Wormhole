@@ -8,12 +8,12 @@
 #include <cpu.h>
 #include "bootefi.h"
 
-Status fwExit(MemoryRegion **memoryRegions, uintn *regionCount) {
+Status fwExit(BootMemoryRegion **memoryRegions, uintn *regionCount) {
     Status status;
     EfiMemoryDescriptor *map;
     uintn mapSize, mapKey, descriptorSize, descriptorCount;
     uint32 descriptorVersion;
-    MemoryRegion *regions;
+    BootMemoryRegion *regions;
 
     consoleDebug(L"Exiting firmware environment...\r\n");
 

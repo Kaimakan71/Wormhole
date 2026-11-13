@@ -26,7 +26,7 @@ static uint8 efiGetMemoryType(const EfiMemoryDescriptor *desc) {
     }
 }
 
-static inline bool canMerge(const EfiMemoryDescriptor *desc, const MemoryRegion *region, uint8 memoryType) {
+static inline bool canMerge(const EfiMemoryDescriptor *desc, const BootMemoryRegion *region, uint8 memoryType) {
     uint64 regionSize;
 
     if (region == NULL) {
@@ -112,8 +112,8 @@ EfiStatus efiGetMemoryMap(EfiMemoryDescriptor **map, uintn *mapSize, uintn *mapK
     return EFI_STATUS_TIMEOUT;
 }
 
-void efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn descriptorCount, MemoryRegion *regions, uintn *regionCountOut) {
-    MemoryRegion *region, *prevRegion;
+void efiTranslateMemoryMap(EfiMemoryDescriptor *map, uintn descriptorSize, uintn descriptorCount, BootMemoryRegion *regions, uintn *regionCountOut) {
+    BootMemoryRegion *region, *prevRegion;
     uintn regionCount;
     EfiMemoryDescriptor *desc;
     uint8 type;

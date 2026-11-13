@@ -10,8 +10,8 @@
 
 #define TRACE_SOURCE "pmm"
 
-Status pmmInitialize(MemoryRegion *memoryRegions, uintn memoryRegionCount) {
-    MemoryRegion *region;
+Status pmmInitialize(BootMemoryRegion *memoryRegions, uintn memoryRegionCount) {
+    BootMemoryRegion *region;
 
     traceDebug("Initializing PMM...\n");
 
