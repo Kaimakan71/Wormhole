@@ -10,11 +10,12 @@
 #include <cpu/i8042.h>
 #include <cpu/i8259.h>
 #include <cpu/pmio.h>
+#include <device.h>
 #include <log.h>
 
 #define TRACE_SOURCE "i8042"
 
-static char8 i8042Keymap[128] = {
+static const char8 i8042Keymap[128] = {
     '\0', '\0', '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',  '9',  '0',  '-',  '=',  '\0', '\0',
     'q',  'w',  'e',  'r',  't',  'y',  'u',  'i',  'o',  'p',  '[',  ']',  '\0', '\0', 'a',  's',
     'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',  '\'', '`',  '\0', '\\', 'z',  'x',  'c',  'v',
@@ -23,6 +24,11 @@ static char8 i8042Keymap[128] = {
     '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
     '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
     '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0',
+};
+
+static Device i8042KeyboardDevice = {
+    .name  = "ps2",
+    .class = &deviceClassKeyboard,
 };
 
 static inline void i8042WaitRead() {
@@ -109,4 +115,7 @@ void i8042Initialize() {
     SET_BIT(config, I8042_CONFIG_INT_ENABLE_A);
     SET_BIT(config, I8042_CONFIG_INT_ENABLE_B);
     i8042ConfigWrite(config);
+
+    /* Register keyboard device */
+    deviceRegister(&i8042KeyboardDevice);
 }
