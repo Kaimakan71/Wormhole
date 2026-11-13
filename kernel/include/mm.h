@@ -31,8 +31,10 @@ void *mmAllocate(uintn size);
 void mmFree(void *ptr);
 
 Status pmmInitialize(BootMemoryRegion *memoryRegions, uintn memoryRegionCount);
-Status pmmAllocate(uintn pageCount, uintn *physicalAddress);
-void pmmFree(uintn physicalAddress, uintn pageCount);
+Status pmmAllocate(uintn pageCount, uint64 *physicalAddress);
+void pmmFree(uint64 physicalAddress, uintn pageCount);
+void *pmmGetOwner(uint64 physicalAddress);
+void pmmSetOwner(uint64 physicalAddress, void *owner);
 
 Status mmHeapInitialize();
 void *mmHeapAllocate(uintn size);

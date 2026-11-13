@@ -18,6 +18,8 @@ typedef struct {
 
     uint64 physicalAddress;
     uint64 pageCount;
+
+    void *owner;
 } MemoryRegion;
 
 static MemoryRegion mmStaticRegions[MM_STATIC_REGION_COUNT];
@@ -30,12 +32,23 @@ static List mmReservedRegions;
 static uint64 mmMaximumPfn;
 static MemoryRegion **mmPfnTable;
 
-static MemoryRegion* pmmCreateRegion() {
+static MemoryRegion *pmmCreateRegion() {
     if (mmStaticRegionsUsed < MM_STATIC_REGION_COUNT) {
         return &mmStaticRegions[mmStaticRegionsUsed++];
     }
 
     return NULL;
+}
+
+static MemoryRegion *pmmGetRegion(uint64 physicalAddress) {
+    uint64 pfn;
+
+    pfn = physicalAddress >> PAGE_SHIFT;
+    if (pfn > mmMaximumPfn) {
+        return NULL;
+    }
+
+    return mmPfnTable[pfn];
 }
 
 Status pmmInitialize(BootMemoryRegion *bootRegions, uintn bootRegionCount) {
@@ -98,6 +111,7 @@ Status pmmInitialize(BootMemoryRegion *bootRegions, uintn bootRegionCount) {
         /* Add to appropriate list */
         region->physicalAddress = bootRegion->physicalAddress;
         region->pageCount = bootRegion->pageCount;
+        region->owner = NULL;
         if (bootRegion->type == MEMORY_TYPE_FREE) {
             listAppend(&mmFreeRegions, &region->listItem);
         } else {
@@ -116,10 +130,10 @@ Status pmmInitialize(BootMemoryRegion *bootRegions, uintn bootRegionCount) {
     return STATUS_SUCCESS;
 }
 
-Status pmmAllocate(uintn pageCount, uintn *physicalAddress) {
+Status pmmAllocate(uintn pageCount, uint64 *physicalAddress) {
     ListItem *listItem;
     MemoryRegion *region, *marginRegion;
-    uint64 marginPageCount;
+    uint64 marginPageCount, marginStart;
 
     listEnumerateItems(&mmFreeRegions, listItem) {
         region = (MemoryRegion *) listItem;
@@ -139,7 +153,13 @@ Status pmmAllocate(uintn pageCount, uintn *physicalAddress) {
             if (marginRegion != NULL) {
                 marginRegion->physicalAddress = region->physicalAddress + PAGES_TO_SIZE(pageCount);
                 marginRegion->pageCount = marginPageCount;
+                marginRegion->owner = NULL;
                 listAppend(&mmFreeRegions, &marginRegion->listItem);
+            }
+
+            marginStart = (region->physicalAddress >> PAGE_SHIFT) + pageCount;
+            for (uintn p = 0; p < marginPageCount; p++) {
+                mmPfnTable[marginStart + p] = marginRegion;
             }
         }
 
@@ -150,16 +170,10 @@ Status pmmAllocate(uintn pageCount, uintn *physicalAddress) {
     return STATUS_ALLOCATION_FAILED;
 }
 
-void pmmFree(uintn physicalAddress, uintn pageCount) {
-    uint64 pfn;
+void pmmFree(uint64 physicalAddress, uintn pageCount) {
     MemoryRegion *region;
 
-    pfn = physicalAddress >> PAGE_SHIFT;
-    if (pfn > mmMaximumPfn) {
-        return;
-    }
-
-    region = mmPfnTable[pfn];
+    region = pmmGetRegion(physicalAddress);
     if (region == NULL) {
         return;
     }
@@ -171,4 +185,24 @@ void pmmFree(uintn physicalAddress, uintn pageCount) {
     /* Move region to free list */
     listItemRemove(&region->listItem);
     listAppend(&mmFreeRegions, &region->listItem);
+}
+
+void *pmmGetOwner(uint64 physicalAddress) {
+    MemoryRegion *region;
+
+    region = pmmGetRegion(physicalAddress);
+    if (region != NULL) {
+        return region->owner;
+    }
+
+    return NULL;
+}
+
+void pmmSetOwner(uint64 physicalAddress, void *owner) {
+    MemoryRegion *region;
+
+    region = pmmGetRegion(physicalAddress);
+    if (region != NULL) {
+        region->owner = owner;
+    }
 }
