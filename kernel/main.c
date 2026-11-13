@@ -12,21 +12,14 @@
 #include <device.h>
 #include <log.h>
 #include <mm.h>
-#include <process.h>
+#include <sched.h>
 
 static void driversInitialize() {
     pciInitialize();
 }
 
-static void idle() {
-    for (;;) {
-        cpuHalt();
-    }
-}
-
 void kernelMain(BootInfo *bootInfo) {
     Status status;
-    Process *idleProcess;
 
     if (bootInfo->signature != BOOT_INFO_SIGNATURE) {
         return;
@@ -45,15 +38,14 @@ void kernelMain(BootInfo *bootInfo) {
 
     deviceInitialize();
     cpuInitialize();
-    driversInitialize();
 
-    logDebug("Creating idle process...\n");
-    idleProcess = processCreate("idle");
-    if (idleProcess == NULL) {
-        logError("Failed to create idle process\n");
+    status = schedInitialize();
+    if (!STATUS_IS_SUCCESS(status)) {
+        logError("Failed to initialize scheduler\n");
         return;
     }
 
-    logWrite("Idling...\n");
-    idle();
+    driversInitialize();
+
+    schedRun();
 }
