@@ -85,6 +85,7 @@ Status mmHeapInitialize() {
         }
 
         slab = (Object *) physToVirt(phys);
+        pmmSetOwner(phys, slab);
         slabInitialize(slab, BIT(MIN_ORDER + o));
         slabs[o] = slab;
     }
@@ -105,7 +106,10 @@ void *mmHeapAllocate(uintn size) {
 }
 
 void mmHeapFree(void *ptr) {
-    (void) ptr;
+    Object *slab;
 
-    /* TODO: Use slab containing ptr */
+    slab = pmmGetOwner(virtToPhys(ptr));
+    if (slab != NULL) {
+        slabFree(slab, ptr);
+    }
 }
