@@ -9,6 +9,7 @@
 #include <bus/pci.h>
 #include <console.h>
 #include <cpu.h>
+#include <device.h>
 #include <log.h>
 #include <mm.h>
 #include <process.h>
@@ -42,8 +43,8 @@ void kernelMain(BootInfo *bootInfo) {
         return;
     }
 
+    deviceInitialize();
     cpuInitialize();
-
     driversInitialize();
 
     logDebug("Creating idle process...\n");
