@@ -57,11 +57,11 @@ static inline uint8 pciGetHeaderType(uint8 bus, uint8 slot, uint8 function) {
     return pciConfigRead8(bus, slot, function, PCI_HEADER_HEADER_TYPE);
 }
 
-static void scanFunction(uint8 bus, uint8 device, uint8 function) {
+static void scanFunction(uint8 bus, uint8 slot, uint8 function) {
     uint16 vendorId;
     PciDevice *dev;
 
-    vendorId = pciGetVendorId(bus, device, function);
+    vendorId = pciGetVendorId(bus, slot, function);
     if (vendorId == PCI_VENDOR_ID_INVALID) {
         return;
     }
@@ -73,39 +73,39 @@ static void scanFunction(uint8 bus, uint8 device, uint8 function) {
     }
 
     dev->bus = bus;
-    dev->device = device;
+    dev->slot = slot;
     dev->function = function;
 
     dev->vendorId = vendorId;
-    dev->deviceId = pciGetDeviceId(bus, device, function);
-    dev->class = pciGetClass(bus, device, function);
-    dev->subclass = pciGetSubclass(bus, device, function);
-    dev->interface = pciGetInterface(bus, device, function);
+    dev->deviceId = pciGetDeviceId(bus, slot, function);
+    dev->class = pciGetClass(bus, slot, function);
+    dev->subclass = pciGetSubclass(bus, slot, function);
+    dev->interface = pciGetInterface(bus, slot, function);
 
     listAppend(&devices, &dev->listItem);
 }
 
-static void scanDevice(uint8 bus, uint8 device) {
-    if (pciGetVendorId(bus, device, 0) == PCI_VENDOR_ID_INVALID) {
+static void scanSlot(uint8 bus, uint8 slot) {
+    if (pciGetVendorId(bus, slot, 0) == PCI_VENDOR_ID_INVALID) {
         return;
     }
 
-    scanFunction(bus, device, 0);
-    if (pciGetHeaderType(bus, device, 0) & PCI_HEADER_TYPE_MULTIFUNCTION) {
+    scanFunction(bus, slot, 0);
+    if (pciGetHeaderType(bus, slot, 0) & PCI_HEADER_TYPE_MULTIFUNCTION) {
         for (uint8 f = 1; f < 8; f++) {
-            scanFunction(bus, device, f);
+            scanFunction(bus, slot, f);
         }
     }
 }
 
 static void scanBus(uint8 bus) {
     for (uint8 d = 0; d < 32; d++) {
-        scanDevice(bus, d);
+        scanSlot(bus, d);
     }
 }
 
-void pciInitialize(void) {
-    traceDebug("Initializing PCI driver...\n");
+void pciInitialize() {
+    traceDebug("Initializing PCI...\n");
 
     listReset(&devices);
     scanBus(0);
@@ -128,4 +128,8 @@ void pciEnumerateDevices(void (*callback)(const PciDevice *)) {
         callback(dev);
         dev = (PciDevice *) dev->listItem.next;
     }
+}
+
+uint32 pciGetBar(const PciDevice *dev, uint8 index) {
+    return pciConfigRead32(dev->bus, dev->slot, dev->function, PCI_HEADER_BAR0 + (index * 4));
 }

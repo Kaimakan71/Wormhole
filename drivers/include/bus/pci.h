@@ -28,6 +28,13 @@
 #define PCI_HEADER_HEADER_TYPE     0x0e
 #define PCI_HEADER_BIST            0x0f
 
+#define PCI_HEADER_BAR0 0x10
+#define PCI_HEADER_BAR1 0x14
+#define PCI_HEADER_BAR2 0x18
+#define PCI_HEADER_BAR3 0x1c
+#define PCI_HEADER_BAR4 0x20
+#define PCI_HEADER_BAR5 0x24
+
 #define PCI_VENDOR_ID_INVALID 0xffff
 
 #define PCI_CLASS_UNCLASSIFIED             0x00
@@ -123,6 +130,14 @@
 #define PCI_SUBCLASS_SERIAL_CANBUS            0x09
 #define PCI_SUBCLASS_SERIAL_MIPI_I3C          0x0a
 
+/* USB interfaces */
+#define PCI_INTERFACE_USB_UHCI   0x00
+#define PCI_INTERFACE_USB_OHCI   0x10
+#define PCI_INTERFACE_USB_EHCI   0x20
+#define PCI_INTERFACE_USB_XHCI   0x30
+#define PCI_INTERFACE_USB_USB4   0x40
+#define PCI_INTERFACE_USB_DEVICE 0xfe
+
 #define PCI_HEADER_TYPE_DEVICE                0x00
 #define PCI_HEADER_TYPE_PCI_TO_PCI_BRIDGE     0x01
 #define PCI_HEADER_TYPE_PCI_TO_CARDBUS_BRIDGE 0x02
@@ -132,7 +147,7 @@ typedef struct {
     ListItem listItem;
 
     uint8 bus;
-    uint8 device;
+    uint8 slot;
     uint8 function;
 
     uint16 vendorId;
@@ -144,5 +159,6 @@ typedef struct {
 
 const char8 *pciGetClassString(uint8 class, uint8 subclass);
 
-void pciInitialize(void);
+void pciInitialize();
 void pciEnumerateDevices(void (*callback)(const PciDevice *));
+uint32 pciGetBar(const PciDevice *dev, uint8 index);
