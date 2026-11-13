@@ -81,10 +81,11 @@ typedef __builtin_va_list VaList;
  * Compiler attributes.
  */
 
-#define __align(n) __attribute__((__aligned__((n))))
-#define __noreturn __attribute__((noreturn))
-#define __packed   __attribute__((packed))
-#define __sysv_abi __attribute__((sysv_abi))
+#define __align(n)  __attribute__((__aligned__((n))))
+#define __interrupt __attribute__((interrupt))
+#define __noreturn  __attribute__((noreturn))
+#define __packed    __attribute__((packed))
+#define __sysv_abi  __attribute__((sysv_abi))
 
 /*
  * Miscellaneous.
