@@ -22,6 +22,8 @@ typedef struct {
     uint16 pdIndex;
 } PagemapCache;
 
+uintn mmArchStackPointer;
+
 static PagemapEntry *pml4 = NULL;
 
 static inline uint16 getPagemapIndex(uintn virtualAddress, uint8 level) {
@@ -71,11 +73,9 @@ Status mmArchInitialize() {
         pml4[e] = 0;
     }
 
-    return STATUS_SUCCESS;
-}
+    mmArchStackPointer = cpuGetRsp();
 
-uintn mmArchGetStack() {
-    return cpuGetRsp();
+    return STATUS_SUCCESS;
 }
 
 Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) {
@@ -134,48 +134,6 @@ Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) 
         virtualAddress += PAGE_SIZE;
         pageCount--;
     }
-
-    return STATUS_SUCCESS;
-}
-
-Status mmGetPhysicalAddress(uintn virtualAddress, uintn *physicalAddress) {
-    PagemapEntry *pdpt, *pd, *pt, pml4Entry, pdptEntry, pdEntry, ptEntry;
-    uint16 pageOff;
-
-    pageOff = virtualAddress & PAGE_MASK;
-    virtualAddress &= ~PAGE_MASK;
-
-    pml4Entry = pml4[getPagemapIndex(virtualAddress, 4)];
-    pdpt = (PagemapEntry *) (pml4Entry & PAGEMAP_ENTRY_ADDRESS_MASK);
-    if (!(pml4Entry & PAGEMAP_ENTRY_PRESENT)) {
-        return STATUS_NOT_FOUND;
-    }
-
-    pdptEntry = pdpt[getPagemapIndex(virtualAddress, 3)];
-    pd = (PagemapEntry *) (pdptEntry & PAGEMAP_ENTRY_ADDRESS_MASK);
-    if (!(pdptEntry & PAGEMAP_ENTRY_PRESENT)) {
-        return STATUS_NOT_FOUND;
-    }
-
-    pdEntry = pd[getPagemapIndex(virtualAddress, 2)];
-    pt = (PagemapEntry *) (pdEntry & PAGEMAP_ENTRY_ADDRESS_MASK);
-    if (!(pdEntry & PAGEMAP_ENTRY_PRESENT)) {
-        return STATUS_NOT_FOUND;
-    }
-
-    if (pdEntry & PAGEMAP_ENTRY_PAGE_SIZE) {
-        /* Mapped as huge page (2 MiB) */
-        *physicalAddress = (pdEntry & PAGEMAP_ENTRY_ADDRESS_MASK) | pageOff;
-        return STATUS_SUCCESS;
-    }
-
-    ptEntry = pt[getPagemapIndex(virtualAddress, 1)];
-    if (!(ptEntry & PAGEMAP_ENTRY_PRESENT)) {
-        return STATUS_NOT_FOUND;
-    }
-
-    /* Mapped as single page (4 KiB) */
-    *physicalAddress = (ptEntry & PAGEMAP_ENTRY_ADDRESS_MASK) | pageOff;
 
     return STATUS_SUCCESS;
 }
