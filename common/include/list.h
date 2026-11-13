@@ -17,6 +17,8 @@ typedef struct {
     ListItem *last;
 } List;
 
+#define listEnumerateItems(list, item) for ((item) = (list)->first; (void *) (item) != (void *) (list); (item) = (item)->next)
+
 static inline void listItemRemove(ListItem *item) {
     item->prev->next = item->next;
     item->next->prev = item->prev;

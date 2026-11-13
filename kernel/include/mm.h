@@ -15,7 +15,8 @@
 #define PAGE_SHIFT 12
 #define PAGE_MASK  0xfff
 
-#define SIZE_TO_PAGES(size) (((size) >> PAGE_SHIFT) + (((size) & PAGE_MASK) ? 1 : 0))
+#define SIZE_TO_PAGES(size)  (((size) >> PAGE_SHIFT) + (((size) & PAGE_MASK) ? 1 : 0))
+#define PAGES_TO_SIZE(pages) ((pages) << PAGE_SHIFT)
 
 static inline void *physToVirt(uintn phys) {
     return (void *) (phys + HHDM_OFFSET);
