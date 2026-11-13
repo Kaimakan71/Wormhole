@@ -11,13 +11,21 @@
 #include <cpu.h>
 #include <log.h>
 #include <mm.h>
+#include <process.h>
 
 static void driversInitialize() {
     pciInitialize();
 }
 
+static void idle() {
+    for (;;) {
+        cpuHalt();
+    }
+}
+
 void kernelMain(BootInfo *bootInfo) {
     Status status;
+    Process *idleProcess;
 
     if (bootInfo->signature != BOOT_INFO_SIGNATURE) {
         return;
@@ -38,8 +46,13 @@ void kernelMain(BootInfo *bootInfo) {
 
     driversInitialize();
 
-    logWrite("Halting...\n");
-    for (;;) {
-        cpuHalt();
+    logDebug("Creating idle process...\n");
+    idleProcess = processCreate("idle");
+    if (idleProcess == NULL) {
+        logError("Failed to create idle process\n");
+        return;
     }
+
+    logWrite("Idling...\n");
+    idle();
 }
