@@ -14,7 +14,11 @@
  */
 
 #define EFI_PAGE_SIZE  0x1000
+#define EFI_PAGE_MASK  0xfff
 #define EFI_PAGE_SHIFT 12
+
+#define EFI_SIZE_TO_PAGES(size)  (((size) >> EFI_PAGE_SHIFT) + (((size) & EFI_PAGE_MASK) ? 1 : 0))
+#define EFI_PAGES_TO_SIZE(pages) ((pages) << EFI_PAGE_SHIFT)
 
 typedef void   *EfiHandle;
 typedef uint64 EfiPhysicalAddress;

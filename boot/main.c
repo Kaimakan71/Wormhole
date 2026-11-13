@@ -22,12 +22,12 @@ Status libInitialize(BootInfo *bootInfo) {
         return status;
     }
 
-    status = fsInitialize();
+    status = displayInitialize(&bootInfo->fb);
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
     }
 
-    status = fbInitialize(&bootInfo->fb);
+    status = fsInitialize();
     if (!STATUS_IS_SUCCESS(status)) {
         return status;
     }
@@ -47,7 +47,7 @@ Status bootMain() {
     uintn kernelSize, kernelEntry;
     __sysv_abi void (*kernelMain)(BootInfo *);
 
-    consoleDebug(L"Starting boot manager...\r\n");
+    consolePrint(L"Starting boot manager...\r\n");
 
     status = libInitialize(&bootInfo);
     if (!STATUS_IS_SUCCESS(status)) {
@@ -61,7 +61,7 @@ Status bootMain() {
         return status;
     }
 
-    status = imgLoad(kernel, kernelSize, &kernelEntry);
+    status = imageLoad(kernel, kernelSize, &kernelEntry);
     mmFreePages(kernel, SIZE_TO_PAGES(kernelSize));
     if (!STATUS_IS_SUCCESS(status)) {
         libShutdown();

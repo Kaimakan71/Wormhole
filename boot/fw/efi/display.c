@@ -9,14 +9,14 @@
 
 static EfiGraphicsOutputProtocol *gop = NULL;
 
-Status fbInitialize(Framebuffer *fb) {
+Status displayInitialize(Framebuffer *fb) {
     Status status;
     EfiGraphicsOutputProtocolMode *mode;
     EfiGraphicsOutputModeInfo *modeInfo;
 
     consoleDebug(L"Initializing display...\r\n");
 
-    status = efiStatusToStatus(efiLocateProtocol(&efiGraphicsOutputProtocol, (void **) &gop));
+    status = efiGetStatus(efiLocateProtocol(&efiGraphicsOutputProtocol, (void **) &gop));
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to locate EFI graphics output protocol\r\n");
         return status;

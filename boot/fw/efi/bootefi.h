@@ -1,5 +1,5 @@
 /*
- * Internal EFI boot manager services.
+ * EFI-specific boot manager services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -11,8 +11,8 @@
 #include "efi.h"
 
 extern const EfiGuid efiLoadedImageProtocol;
-extern const EfiGuid efiSimpleFilesystemProtocol;
 extern const EfiGuid efiGraphicsOutputProtocol;
+extern const EfiGuid efiSimpleFilesystemProtocol;
 
 extern EfiHandle efiImageHandle;
 extern EfiSimpleTextOutputProtocol *efiConsoleOut;
@@ -23,8 +23,8 @@ extern EfiLoadedImageProtocol *efiLoadedImage;
  * Status code services.
  */
 
-EfiStatus statusToEfiStatus(Status status);
-Status efiStatusToStatus(EfiStatus efiStatus);
+Status efiGetStatus(EfiStatus efiStatus);
+EfiStatus efiGetEfiStatus(Status status);
 
 /*
  * Protocol services.

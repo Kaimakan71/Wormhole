@@ -11,10 +11,11 @@
 #include <status.h>
 
 #define PAGE_SIZE  0x1000
-#define PAGE_SHIFT 12
 #define PAGE_MASK  0xfff
+#define PAGE_SHIFT 12
 
-#define SIZE_TO_PAGES(size) (((size) >> PAGE_SHIFT) + (((size) & PAGE_MASK) ? 1 : 0))
+#define SIZE_TO_PAGES(size)  (((size) >> PAGE_SHIFT) + (((size) & PAGE_MASK) ? 1 : 0))
+#define PAGES_TO_SIZE(pages) ((pages) << PAGE_SHIFT)
 
 /*
  * Console services.
@@ -31,14 +32,19 @@ void consoleError(const char16 *format, ...);
  */
 
 Status mmInitialize(uintn heapSize);
-Status mmAllocatePages(uintn pageCount, bool executable, void **ptr);
+Status mmAllocatePages(uintn pageCount, bool code, void **ptr);
 void mmFreePages(void *ptr, uintn pageCount);
 Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount);
-Status mmGetPhysicalAddress(uintn virtualAddress, uintn *physicalAddress);
 void mmActivateMappings();
 void *mmHeapAllocate(uintn size);
 void mmHeapFree(void *ptr);
 void mmShutdown();
+
+/*
+ * Display services.
+ */
+
+Status displayInitialize(Framebuffer *fb);
 
 /*
  * Filesystem services.
@@ -49,16 +55,10 @@ Status fsLoad(const char16 *path, void **data, uintn *size);
 void fsShutdown();
 
 /*
- * Framebuffer services.
- */
-
-Status fbInitialize(Framebuffer *fb);
-
-/*
  * Image loading services.
  */
 
-Status imgLoad(void *image, uintn imageSize, uintn *entry);
+Status imageLoad(void *image, uintn imageSize, uintn *entry);
 
 /*
  * Firmware services.

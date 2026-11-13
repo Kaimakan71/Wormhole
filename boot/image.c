@@ -72,7 +72,7 @@ static Status loadPhdr(void *image, ElfProgramHeader *phdr) {
     return STATUS_SUCCESS;
 }
 
-Status imgLoad(void *image, uintn imageSize, uintn *entry) {
+Status imageLoad(void *image, uintn imageSize, uintn *entry) {
     Status status;
     ElfImageHeader *hdr;
     ElfProgramHeader *phdr;

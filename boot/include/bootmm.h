@@ -9,12 +9,12 @@
 
 #include <status.h>
 
+extern uintn mmArchStackPointer;
+
 Status mmArchInitialize();
-uintn mmArchGetStack();
 void mmArchShutdown();
 
 Status mmHeapInitialize(uintn heapSize);
 void mmHeapShutdown();
 
 Status mmFwInitialize();
-void mmFwShutdown();

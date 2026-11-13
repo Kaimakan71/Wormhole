@@ -32,7 +32,6 @@ Status mmInitialize(uintn heapSize) {
 }
 
 void mmShutdown() {
-    mmFwShutdown();
     mmHeapShutdown();
     mmArchShutdown();
 }

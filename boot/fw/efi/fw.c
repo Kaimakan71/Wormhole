@@ -21,7 +21,7 @@ Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount) {
     fsShutdown();
     efiCloseProtocol(efiImageHandle, &efiLoadedImageProtocol);
 
-    status = efiStatusToStatus(efiGetMemoryMap(&map, &mapSize, &mapKey, &descriptorSize, &descriptorVersion));
+    status = efiGetStatus(efiGetMemoryMap(&map, &mapSize, &mapKey, &descriptorSize, &descriptorVersion));
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to get EFI memory map\r\n");
         return status;
@@ -38,7 +38,7 @@ Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount) {
     efiTranslateMemoryMap(map, descriptorSize, descriptorCount, regions, regionCount);
     *memoryRegions = regions;
 
-    status = efiStatusToStatus(efiBootServices->exitBootServices(efiImageHandle, mapKey));
+    status = efiGetStatus(efiBootServices->exitBootServices(efiImageHandle, mapKey));
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to exit EFI boot services\r\n");
         return status;

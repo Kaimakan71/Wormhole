@@ -10,41 +10,41 @@
 
 #define DEFAULT_ATTRIBUTE EFI_TEXT_MAKE_ATTRIBUTE(EFI_COLOR_LIGHTGRAY, EFI_COLOR_BLACK)
 
-static char16 buffer[256];
+static char16 efiConsoleBuffer[256];
 
 void consolePrint(const char16 *format, ...) {
     VaList args;
 
     vaListStart(args, format);
-    stringFormat16(buffer, ARRAY_LENGTH(buffer), format, args);
+    stringFormat16(efiConsoleBuffer, ARRAY_LENGTH(efiConsoleBuffer), format, args);
     vaListEnd(args);
 
-    efiConsoleOut->outputString(efiConsoleOut, buffer);
+    efiConsoleOut->outputString(efiConsoleOut, efiConsoleBuffer);
 }
 
-#define DO_PRINT(tag, color) ({                                                                  \
+#define PrintPrefxed(tag, color) ({                                                              \
     VaList args;                                                                                 \
     vaListStart(args, format);                                                                   \
-    stringFormat16(buffer, ARRAY_LENGTH(buffer), format, args);                                  \
+    stringFormat16(efiConsoleBuffer, ARRAY_LENGTH(efiConsoleBuffer), format, args);              \
     vaListEnd(args);                                                                             \
     efiConsoleOut->setAttribute(efiConsoleOut, EFI_TEXT_MAKE_ATTRIBUTE(color, EFI_COLOR_BLACK)); \
     efiConsoleOut->outputString(efiConsoleOut, tag);                                             \
     efiConsoleOut->setAttribute(efiConsoleOut, DEFAULT_ATTRIBUTE);                               \
-    efiConsoleOut->outputString(efiConsoleOut, buffer);                                          \
+    efiConsoleOut->outputString(efiConsoleOut, efiConsoleBuffer);                                \
 })
 
 void consoleDebug(const char16 *format, ...) {
-    DO_PRINT(L"[ debug ] ", EFI_COLOR_LIGHTGRAY);
+    PrintPrefxed(L"[ debug ] ", EFI_COLOR_LIGHTGRAY);
 }
 
 void consoleInfo(const char16 *format, ...) {
-    DO_PRINT(L"[ info ] ", EFI_COLOR_LIGHTCYAN);
+    PrintPrefxed(L"[ info ] ", EFI_COLOR_LIGHTCYAN);
 }
 
 void consoleWarning(const char16 *format, ...) {
-    DO_PRINT(L"[ warning ] ", EFI_COLOR_YELLOW);
+    PrintPrefxed(L"[ warning ] ", EFI_COLOR_YELLOW);
 }
 
 void consoleError(const char16 *format, ...) {
-    DO_PRINT(L"[ error ] ", EFI_COLOR_LIGHTRED);
+    PrintPrefxed(L"[ error ] ", EFI_COLOR_LIGHTRED);
 }

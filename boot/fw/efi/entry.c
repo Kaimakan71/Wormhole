@@ -31,7 +31,7 @@ EfiStatus efiEntry(EfiHandle imageHandle, EfiSystemTable *systemTable) {
     consoleInfo(L"Image base: 0x%x\r\n", efiLoadedImage->imageBase);
     consoleInfo(L"Image size: 0x%64x\r\n", efiLoadedImage->imageSize);
 
-    status = statusToEfiStatus(bootMain());
+    status = efiGetEfiStatus(bootMain());
 
     efiCloseProtocol(efiImageHandle, &efiLoadedImageProtocol);
 

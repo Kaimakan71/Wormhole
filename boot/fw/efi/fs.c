@@ -11,7 +11,7 @@ static const EfiGuid efiFileInfo = EFI_FILE_INFO_ID;
 
 static EfiFileProtocol *root = NULL;
 
-static EfiStatus close(EfiFileProtocol *file) {
+static EfiStatus efiFileClose(EfiFileProtocol *file) {
     EfiStatus status;
 
     status = file->close(file);
@@ -22,13 +22,15 @@ static EfiStatus close(EfiFileProtocol *file) {
     return status;
 }
 
-static EfiStatus getInfo(EfiFileProtocol *file, EfiFileInfo **info) {
+static EfiStatus efiFileGetInfo(EfiFileProtocol *file, EfiFileInfo **info) {
     EfiStatus status;
     uintn bufSize;
     EfiFileInfo *buf;
 
     bufSize = 0;
-    status = file->getInfo(file, (EfiGuid *) &efiFileInfo, &bufSize, NULL);
+    buf = NULL;
+
+    status = file->getInfo(file, (EfiGuid *) &efiFileInfo, &bufSize, buf);
     if (status != EFI_STATUS_BUFFER_TOO_SMALL) {
         return status;
     }
@@ -54,7 +56,7 @@ Status fsInitialize() {
 
     consoleDebug(L"Initializing filesystem...\r\n");
 
-    status = efiStatusToStatus(efiOpenProtocol(
+    status = efiGetStatus(efiOpenProtocol(
         efiLoadedImage->deviceHandle,
         (EfiGuid *) &efiSimpleFilesystemProtocol,
         (void **) &fs
@@ -64,7 +66,7 @@ Status fsInitialize() {
         return status;
     }
 
-    status = efiStatusToStatus(fs->openVolume(fs, &root));
+    status = efiGetStatus(fs->openVolume(fs, &root));
     efiCloseProtocol(efiImageHandle, (EfiGuid *) &efiSimpleFilesystemProtocol);
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to open root volume\r\n");
@@ -83,7 +85,7 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
 
     consoleDebug(L"Loading file \"%s\"...\r\n", path);
 
-    status = efiStatusToStatus(root->open(
+    status = efiGetStatus(root->open(
         root,
         &file,
         (char16 *) path,
@@ -95,10 +97,10 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
         return status;
     }
 
-    status = efiStatusToStatus(getInfo(file, &info));
+    status = efiGetStatus(efiFileGetInfo(file, &info));
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to get info for file \"%s\"\r\n", path);
-        close(file);
+        efiFileClose(file);
         return status;
     }
     bufSize = info->fileSize;
@@ -108,12 +110,12 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
     status = mmAllocatePages(pageCount, false, &buf);
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to allocate %u page(s) for file \"%s\"\r\n", pageCount, path);
-        close(file);
+        efiFileClose(file);
         return STATUS_ALLOCATION_FAILED;
     }
 
-    status = efiStatusToStatus(file->read(file, &bufSize, buf));
-    close(file);
+    status = efiGetStatus(file->read(file, &bufSize, buf));
+    efiFileClose(file);
     if (!STATUS_IS_SUCCESS(status)) {
         consoleError(L"Failed to read file \"%s\"\r\n", path);
         mmFreePages(buf, pageCount);
@@ -127,7 +129,7 @@ Status fsLoad(const char16 *path, void **data, uintn *size) {
 
 void fsShutdown() {
     if (root != NULL) {
-        close(root);
+        efiFileClose(root);
         root = NULL;
     }
 }

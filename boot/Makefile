@@ -17,7 +17,7 @@ ifeq ($(TARGET_FIRMWARE),efi)
 	include fw/efi/build.mk
 endif
 
-export CFILES += $(addprefix mm/,heap.c mm.c) img.c main.c
+export CFILES += $(addprefix mm/,heap.c mm.c) image.c main.c
 
 ifeq ($(CONFIG_QEMU_KVM),y)
 	export QEMUFLAGS += --enable-kvm
