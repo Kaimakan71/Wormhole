@@ -128,6 +128,7 @@ Status pmmAllocate(uintn pageCount, uintn *physicalAddress) {
         }
 
         /* Move region to used list */
+        region->pageCount = pageCount;
         listItemRemove(listItem);
         listAppend(&mmUsedRegions, listItem);
 
@@ -150,8 +151,24 @@ Status pmmAllocate(uintn pageCount, uintn *physicalAddress) {
 }
 
 void pmmFree(uintn physicalAddress, uintn pageCount) {
-    (void) physicalAddress;
-    (void) pageCount;
+    uint64 pfn;
+    MemoryRegion *region;
 
-    /* TODO: Implement this routine. */
+    pfn = physicalAddress >> PAGE_SHIFT;
+    if (pfn > mmMaximumPfn) {
+        return;
+    }
+
+    region = mmPfnTable[pfn];
+    if (region == NULL) {
+        return;
+    }
+
+    if (pageCount != region->pageCount) {
+        return;
+    }
+
+    /* Move region to free list */
+    listItemRemove(&region->listItem);
+    listAppend(&mmFreeRegions, &region->listItem);
 }
