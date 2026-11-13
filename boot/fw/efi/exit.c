@@ -1,5 +1,5 @@
 /*
- * EFI firmware services.
+ * EFI firmware exit services.
  * Copyright (c) 2026, Quinn Stephens.
  * All rights reserved.
  * Provided under the BSD 3-Clause license.
@@ -8,7 +8,7 @@
 #include <cpu.h>
 #include "bootefi.h"
 
-Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount) {
+Status fwExit(MemoryRegion **memoryRegions, uintn *regionCount) {
     Status status;
     EfiMemoryDescriptor *map;
     uintn mapSize, mapKey, descriptorSize, descriptorCount;

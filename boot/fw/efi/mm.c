@@ -159,8 +159,8 @@ Status mmFwInitialize() {
         return status;
     }
 
-    /* Map the boot manager itself */
-    consoleDebug(L"Mapping boot manager...\r\n");
+    /* Map the boot application itself */
+    consoleDebug(L"Mapping boot application...\r\n");
     desc = map;
     totalPages = 0;
     for (uintn d = 0; d < (mapSize / descriptorSize); d++) {

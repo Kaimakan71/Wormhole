@@ -61,10 +61,21 @@ void fsShutdown();
 Status imageLoad(void *image, uintn imageSize, uintn *entry);
 
 /*
- * Firmware services.
+ * Firmware exit services.
  */
 
-Status fwShutdown(MemoryRegion **memoryRegions, uintn *regionCount);
+Status fwExit(MemoryRegion **memoryRegions, uintn *regionCount);
+
+/*
+ * Boot library services.
+ */
+
+typedef struct {
+    uintn heapSize;
+} LibraryParameters;
+
+Status libraryInitialize(LibraryParameters *parameters, BootInfo *bootInfo);
+void libraryShutdown();
 
 /*
  * Boot manager main routine.

@@ -12,76 +12,51 @@
 
 #define KERNEL_PATH L"\\kernel.elf"
 
-Status libInitialize(BootInfo *bootInfo) {
-    Status status;
-
-    bootInfo->signature = BOOT_INFO_SIGNATURE;
-
-    status = mmInitialize(HEAP_SIZE);
-    if (!STATUS_IS_SUCCESS(status)) {
-        return status;
-    }
-
-    status = displayInitialize(&bootInfo->fb);
-    if (!STATUS_IS_SUCCESS(status)) {
-        return status;
-    }
-
-    status = fsInitialize();
-    if (!STATUS_IS_SUCCESS(status)) {
-        return status;
-    }
-
-    return STATUS_SUCCESS;
-}
-
-void libShutdown() {
-    fsShutdown();
-    mmShutdown();
-}
+static BootInfo bootInfo;
 
 Status bootMain() {
     Status status;
-    BootInfo bootInfo;
-    void *kernel;
-    uintn kernelSize, kernelEntry;
-    __sysv_abi void (*kernelMain)(BootInfo *);
+    LibraryParameters libraryParams;
+    void *img;
+    uintn imgSize, imgEntry;
+    __sysv_abi void (*osMain)(BootInfo *);
 
     consolePrint(L"Starting boot manager...\r\n");
 
-    status = libInitialize(&bootInfo);
+    libraryParams.heapSize = HEAP_SIZE;
+    status = libraryInitialize(&libraryParams, &bootInfo);
     if (!STATUS_IS_SUCCESS(status)) {
-        libShutdown();
-        return status;
+        goto exit;
     }
 
-    status = fsLoad(KERNEL_PATH, &kernel, &kernelSize);
+    status = fsLoad(KERNEL_PATH, &img, &imgSize);
     if (!STATUS_IS_SUCCESS(status)) {
-        libShutdown();
-        return status;
+        goto exit;
     }
 
-    status = imageLoad(kernel, kernelSize, &kernelEntry);
-    mmFreePages(kernel, SIZE_TO_PAGES(kernelSize));
+    status = imageLoad(img, imgSize, &imgEntry);
+    mmFreePages(img, SIZE_TO_PAGES(imgSize));
     if (!STATUS_IS_SUCCESS(status)) {
-        libShutdown();
-        return status;
+        goto exit;
     }
 
     /*
      * This is the point of no return.
      * Once we disable firmware services, we must either
-     * transition to the kernel or hang.
+     * transition to the OS or hang.
      */
 
-    status = fwShutdown(&bootInfo.memoryRegions, &bootInfo.memoryRegionCount);
+    status = fwExit(&bootInfo.memoryRegions, &bootInfo.memoryRegionCount);
     if (!STATUS_IS_SUCCESS(status)) {
-        libShutdown();
-        return status;
+        goto exit;
     }
 
     mmActivateMappings();
-    kernelMain = (void *) kernelEntry;
-    kernelMain(&bootInfo);
+    osMain = (void *) imgEntry;
+    osMain(&bootInfo);
     cpuHang();
+
+exit:
+    libraryShutdown();
+    return status;
 }
