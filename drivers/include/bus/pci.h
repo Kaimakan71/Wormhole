@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include <list.h>
-#include <types.h>
+#include <device.h>
 
 #define PCI_CONFIG_ADDRESS 0x0cf8
 #define PCI_CONFIG_DATA    0x0cfc
@@ -144,7 +143,7 @@
 #define PCI_HEADER_TYPE_MULTIFUNCTION         BIT(7)
 
 typedef struct {
-    ListItem listItem;
+    Device device;
 
     uint8 bus;
     uint8 slot;
@@ -160,5 +159,5 @@ typedef struct {
 const char8 *pciGetClassString(uint8 class, uint8 subclass);
 
 void pciInitialize();
-void pciEnumerateDevices(void (*callback)(const PciDevice *));
-uint32 pciGetBar(const PciDevice *dev, uint8 index);
+
+uint32 pciGetBar(PciDevice *dev, uint8 index);

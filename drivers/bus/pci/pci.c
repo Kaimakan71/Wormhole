@@ -12,7 +12,9 @@
 
 #define TRACE_SOURCE "pci"
 
-static List devices;
+static DeviceClass pciDeviceClass = {
+    .name = "pci",
+};
 
 static inline void pciConfigSelect(uint8 bus, uint8 slot, uint8 function, uint8 offset) {
     pmioWrite32(PCI_CONFIG_ADDRESS, PCI_CONFIG_ADDRESS_ENABLE | (bus << 16) | (slot << 11) | (function << 8) | (offset & 0xfc));
@@ -68,9 +70,12 @@ static void scanFunction(uint8 bus, uint8 slot, uint8 function) {
 
     dev = heapAllocate(sizeof(*dev));
     if (dev == NULL) {
-        traceError("Failed to allocate memory for device descriptor\n");
+        traceError("Failed to allocate memory for device\n");
         return;
     }
+
+    dev->device.name = "device";
+    dev->device.class = &pciDeviceClass;
 
     dev->bus = bus;
     dev->slot = slot;
@@ -82,7 +87,7 @@ static void scanFunction(uint8 bus, uint8 slot, uint8 function) {
     dev->subclass = pciGetSubclass(bus, slot, function);
     dev->interface = pciGetInterface(bus, slot, function);
 
-    listAppend(&devices, &dev->listItem);
+    deviceRegister(&dev->device);
 }
 
 static void scanSlot(uint8 bus, uint8 slot) {
@@ -106,7 +111,7 @@ static void scanBus(uint8 bus) {
 
 void pciInitialize() {
     traceDebug("Discovering devices...\n");
-    listReset(&devices);
+    deviceClassRegister(&pciDeviceClass);
     scanBus(0);
     if (pciGetHeaderType(0, 0, 0) & PCI_HEADER_TYPE_MULTIFUNCTION) {
         for (uint8 f = 1; f < 8; f++) {
@@ -119,14 +124,6 @@ void pciInitialize() {
     }
 }
 
-void pciEnumerateDevices(void (*callback)(const PciDevice *)) {
-    ListItem *listItem;
-
-    listEnumerateItems (&devices, listItem) {
-        callback((PciDevice *) listItem);
-    }
-}
-
-uint32 pciGetBar(const PciDevice *dev, uint8 index) {
+uint32 pciGetBar(PciDevice *dev, uint8 index) {
     return pciConfigRead32(dev->bus, dev->slot, dev->function, PCI_HEADER_BAR0 + (index * 4));
 }
