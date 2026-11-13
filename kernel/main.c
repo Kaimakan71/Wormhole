@@ -12,15 +12,6 @@
 #include <log.h>
 #include <mm.h>
 
-static void printPciDevice(const PciDevice *dev) {
-    logDebug("%8x:%8x.%8u: %s: %16x:%16x\n",
-        dev->bus, dev->device, dev->function,
-        pciGetClassString(dev->class, dev->subclass),
-        dev->vendorId,
-        dev->deviceId
-    );
-}
-
 void kernelMain(BootInfo *bootInfo) {
     Status status;
 
@@ -40,7 +31,6 @@ void kernelMain(BootInfo *bootInfo) {
     }
 
     pciInitialize();
-    pciEnumerateDevices(printPciDevice);
 
     logWrite("Goodbye!\n");
     cpuHang();
