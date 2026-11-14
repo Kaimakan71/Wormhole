@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <status.h>
-
 #define SYSCALL_YIELD 0
 
-Status syscallInitialize();
+void syscallInitialize();

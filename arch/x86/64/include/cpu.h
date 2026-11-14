@@ -13,9 +13,10 @@
 
 #define __cacheline_aligned __align(CACHE_LINE_SIZE)
 
-#define cpuHalt()       ASMV("hlt")
 #define cpuIntEnable()  ASMV("sti")
 #define cpuIntDisable() ASMV("cli")
+#define cpuPause()      ASMV("pause")
+#define cpuHalt()       ASMV("hlt")
 
 #define cpuHang() ({  \
     ASMV("cli; hlt"); \

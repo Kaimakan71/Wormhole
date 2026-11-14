@@ -6,22 +6,26 @@
  */
 
 #include <asm.h>
+#include <cpu/gdt.h>
 
 .extern syscallDispatch
 
 BEGIN_FUNC(syscallEntry)
     swapgs
 
+    /* Switch to thread's kernel stack */
     mov %rsp, %gs:8
     mov %gs:0, %rsp
 
-    pushq $0x1b   /* User SS */
-    pushq %gs:8   /* User RSP */
-    push %r11     /* User RFLAGS */
-    pushq $0x23   /* User CS */
-    push %rcx     /* User RIP */
-    sub $16, %rsp /* Error code and vector */
+    pushq $USER_DS /* User SS */
+    pushq %gs:8    /* User RSP */
+    push %r11      /* User RFLAGS */
+    pushq $USER_CS /* User CS */
+    push %rcx      /* User RIP */
+    push %rax      /* Error code */
+    push %rax      /* Vector */
 
+    /* Save thread state */
     push %rax
     push %rbx
     push %rcx
@@ -38,13 +42,15 @@ BEGIN_FUNC(syscallEntry)
     push %r14
     push %r15
 
-    sti
-
+    /* Dispatch syscall */
     mov %rsp, %rdi
+    mov %rax, %rsi
     call syscallDispatch
 
-    cli
+    /* Switch to new kernel stack */
+    mov %rax, %rsp
 
+    /* Restore new thread state */
     pop %r15
     pop %r14
     pop %r13
@@ -61,6 +67,13 @@ BEGIN_FUNC(syscallEntry)
     pop %rbx
     pop %rax
 
+    pop %rcx /* Ignore vector */
+    pop %rcx /* Ignore error code */
+    pop %rcx /* User RIP */
+    pop %r11 /* Ignore CS */
+    pop %r11 /* User RFLAGS */
+
+    /* Switch to new user stack */
     mov %gs:8, %rsp
 
     swapgs

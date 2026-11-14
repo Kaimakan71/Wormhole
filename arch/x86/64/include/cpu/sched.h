@@ -9,4 +9,4 @@
 
 #include <cpu/state.h>
 
-void schedYield(CpuState *regs);
+CpuThreadState *schedYield(CpuThreadState *state);

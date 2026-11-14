@@ -36,7 +36,7 @@ static const char8 *types[] = {
     "[#CP] Control Protection Exception",
 };
 
-void trapException(CpuState *regs) {
+void trapException(CpuThreadState *state) {
     consoleReset(false);
     logError("Processor exception detected!\n");
     logWrite(
@@ -47,13 +47,13 @@ void trapException(CpuState *regs) {
         "   RSI=0x%x RDI=0x%x  R8=0x%x     R9=0x%x\n"
         "   R10=0x%x R11=0x%x R12=0x%x    R13=0x%x\n"
         "   R14=0x%x R15=0x%x RBP=0x%x RFLAGS=0x%x\n",
-        types[regs->vector], regs->errorCode,
-        regs->cs, regs->rip,
-        regs->ss, regs->rsp,
-        regs->rax, regs->rbx, regs->rcx, regs->rdx,
-        regs->rsi, regs->rdi, regs->r8,  regs->r9,
-        regs->r10, regs->r11, regs->r12, regs->r13,
-        regs->r14, regs->r15, regs->rbp, regs->rflags
+        types[state->vector], state->errorCode,
+        state->cs, state->rip,
+        state->ss, state->rsp,
+        state->rax, state->rbx, state->rcx, state->rdx,
+        state->rsi, state->rdi, state->r8,  state->r9,
+        state->r10, state->r11, state->r12, state->r13,
+        state->r14, state->r15, state->rbp, state->rflags
     );
     cpuHang();
 }

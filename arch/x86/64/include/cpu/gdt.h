@@ -7,12 +7,14 @@
 
 #pragma once
 
-#include <types.h>
-
 #define KERNEL_CS 0x08
 #define KERNEL_DS 0x10
-#define USER_DS   0x18
-#define USER_CS   0x20
+#define USER_DS   0x1b
+#define USER_CS   0x23
+
+#ifndef __ASSEMBLER__
+
+#include <types.h>
 
 #define GDT_ENTRY_ATTRIBUTE_ACCESSED    BIT(0)
 #define GDT_ENTRY_ATTRIBUTE_EXECUTABLE  BIT(3)
@@ -54,3 +56,5 @@ typedef struct __packed {
 extern GdtEntry gdt[GDT_ENTRY_COUNT];
 
 void gdtInitialize();
+
+#endif

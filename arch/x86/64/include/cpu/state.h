@@ -10,6 +10,11 @@
 #include <types.h>
 
 typedef struct __packed {
+    uint64 kernelStackTop;
+    uint64 userRsp;
+} CpuGlobalState;
+
+typedef struct __packed {
     uint64 r15;
     uint64 r14;
     uint64 r13;
@@ -33,4 +38,6 @@ typedef struct __packed {
     uint64 rflags;
     uint64 rsp;
     uint64 ss;
-} CpuState;
+} CpuThreadState;
+
+extern CpuGlobalState cpuGlobalState;

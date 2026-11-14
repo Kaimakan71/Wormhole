@@ -13,17 +13,22 @@
 
 #define TRACE_SOURCE "sched"
 
+#define syscall0(function) ASMV("syscall" : : "a" (function) : "rcx", "r11", "memory")
+
 void schedStart() {
     traceDebug("Starting scheduler...\n");
-    ASMV("syscall" : : "a" (SYSCALL_YIELD) : "rcx", "r11", "memory");
+    syscall0(SYSCALL_YIELD);
+
+    traceDebug("Idling...\n");
+    for (;;) {
+        cpuPause();
+    }
 }
 
-void schedYield(CpuState *regs) {
-    (void) regs;
+CpuThreadState *schedYield(CpuThreadState *state) {
+    traceDebug("Thread requested yield\n");
 
-    traceDebug("Yield!\n");
+    /* TODO: Schedule new thread here */
 
-    for (;;) {
-        ASMV("pause");
-    }
+    return state;
 }
