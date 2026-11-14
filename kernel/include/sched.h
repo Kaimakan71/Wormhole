@@ -8,4 +8,4 @@
 #include <status.h>
 
 Status schedInitialize();
-void schedRun();
+void schedStart();

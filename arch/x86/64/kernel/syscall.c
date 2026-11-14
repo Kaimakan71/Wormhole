@@ -8,6 +8,7 @@
 #include <cpu.h>
 #include <cpu/gdt.h>
 #include <cpu/msr.h>
+#include <cpu/sched.h>
 #include <cpu/syscall.h>
 #include <log.h>
 #include <mm.h>
@@ -53,6 +54,8 @@ Status syscallInitialize() {
     return STATUS_SUCCESS;
 }
 
-void syscallDispatch(SyscallRegs *args) {
-    (void) args;
+void syscallDispatch(CpuState *regs) {
+    if (regs->rax == SYSCALL_YIELD) {
+        schedYield(regs);
+    }
 }

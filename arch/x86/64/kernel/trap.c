@@ -7,6 +7,7 @@
 
 #include <console.h>
 #include <cpu.h>
+#include <cpu/state.h>
 #include <cpu/trap.h>
 #include <log.h>
 
@@ -35,7 +36,7 @@ static const char8 *types[] = {
     "[#CP] Control Protection Exception",
 };
 
-void trapException(Trapframe *tf) {
+void trapException(CpuState *regs) {
     consoleReset(false);
     logError("Processor exception detected!\n");
     logWrite(
@@ -46,13 +47,13 @@ void trapException(Trapframe *tf) {
         "   RSI=0x%x RDI=0x%x  R8=0x%x     R9=0x%x\n"
         "   R10=0x%x R11=0x%x R12=0x%x    R13=0x%x\n"
         "   R14=0x%x R15=0x%x RBP=0x%x RFLAGS=0x%x\n",
-        types[tf->vector], tf->errorCode,
-        tf->cs, tf->rip,
-        tf->ss, tf->rsp,
-        tf->rax, tf->rbx, tf->rcx, tf->rdx,
-        tf->rsi, tf->rdi, tf->r8,  tf->r9,
-        tf->r10, tf->r11, tf->r12, tf->r13,
-        tf->r14, tf->r15, tf->rbp, tf->rflags
+        types[regs->vector], regs->errorCode,
+        regs->cs, regs->rip,
+        regs->ss, regs->rsp,
+        regs->rax, regs->rbx, regs->rcx, regs->rdx,
+        regs->rsi, regs->rdi, regs->r8,  regs->r9,
+        regs->r10, regs->r11, regs->r12, regs->r13,
+        regs->r14, regs->r15, regs->rbp, regs->rflags
     );
     cpuHang();
 }

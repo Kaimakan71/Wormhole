@@ -25,10 +25,3 @@ Status schedInitialize() {
 
     return STATUS_SUCCESS;
 }
-
-void schedRun() {
-    traceDebug("Idling...\n");
-    for (;;) {
-        cpuHalt();
-    }
-}

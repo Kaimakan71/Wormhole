@@ -15,7 +15,13 @@ BEGIN_FUNC(syscallEntry)
     mov %rsp, %gs:8
     mov %gs:0, %rsp
 
-    pushq %gs:8
+    pushq $0x1b   /* User SS */
+    pushq %gs:8   /* User RSP */
+    push %r11     /* User RFLAGS */
+    pushq $0x23   /* User CS */
+    push %rcx     /* User RIP */
+    sub $16, %rsp /* Error code and vector */
+
     push %rax
     push %rbx
     push %rcx
@@ -54,7 +60,8 @@ BEGIN_FUNC(syscallEntry)
     pop %rcx
     pop %rbx
     pop %rax
-    pop %rsp
+
+    mov %gs:8, %rsp
 
     swapgs
     sysretq

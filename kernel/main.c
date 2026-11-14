@@ -52,5 +52,5 @@ void kernelMain(BootInfo *bootInfo) {
 
     driversInitialize();
 
-    schedRun();
+    schedStart();
 }

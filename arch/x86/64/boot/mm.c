@@ -55,7 +55,7 @@ static PagemapEntry *getNextLevel(PagemapEntry *table, uint16 index) {
     }
 
     /* Map new table in previous level */
-    table[index] = (uintn) newTable | PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE;
+    table[index] = (uintn) newTable | PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE | PAGEMAP_ENTRY_USER;
 
     return newTable;
 }
@@ -83,7 +83,7 @@ Status mmMapPages(uintn virtualAddress, uintn physicalAddress, uintn pageCount) 
     uint16 pml4Index, pdptIndex, pdIndex, ptIndex;
     PagemapEntry entryFlags;
 
-    entryFlags = PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE;
+    entryFlags = PAGEMAP_ENTRY_PRESENT | PAGEMAP_ENTRY_WRITABLE | PAGEMAP_ENTRY_USER;
 
     cache.pml4Index = PAGEMAP_INDEX_INVALID;
     while (pageCount) {
