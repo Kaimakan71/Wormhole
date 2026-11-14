@@ -52,5 +52,9 @@ void kernelMain(BootInfo *bootInfo) {
 
     driversInitialize();
 
-    schedStart();
+    status = schedStart();
+    if (!STATUS_IS_SUCCESS(status)) {
+        logError("Failed to start scheduler\n");
+        return;
+    }
 }

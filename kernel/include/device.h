@@ -8,7 +8,6 @@
 #pragma once
 
 #include <list.h>
-#include <types.h>
 
 typedef struct {
     ListItem listItem;

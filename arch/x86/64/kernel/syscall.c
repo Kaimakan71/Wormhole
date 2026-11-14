@@ -33,7 +33,7 @@ void syscallInitialize() {
 CpuThreadState *syscallDispatch(CpuThreadState *state, uintn function) {
     switch (function) {
     case SYSCALL_YIELD:
-        state = schedYield(state);
+        state = schedYield();
         break;
     default:
         state->rax = STATUS_UNSUPPORTED;

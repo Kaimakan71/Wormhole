@@ -17,30 +17,40 @@
 
 #define syscall0(function) ASMV("syscall" : : "a" (function) : "rcx", "r11", "memory")
 
-__noreturn void schedStart() {
-    Thread *idleThread;
+static void schedSetCurrentThread(Thread *thread) {
+    cpuGlobalState.currentThread = thread;
+    cpuGlobalState.kernelStackTop = thread->kernelStackTop;
+}
+
+Status schedStart() {
+    Thread *nextThread;
 
     traceDebug("Starting scheduler...\n");
 
-    idleThread = (Thread *) schedIdleProcess->threads.first;
-    cpuGlobalState.currentThread = idleThread;
-    cpuGlobalState.kernelStackTop = idleThread->kernelStackTop;
-    syscall0(SYSCALL_YIELD);
-
-    traceDebug("Idling...\n");
-    for (;;) {
-        cpuPause();
+    nextThread = schedSchedule();
+    if (nextThread == NULL) {
+        return STATUS_UNKNOWN_ERROR;
     }
+
+    schedSetCurrentThread(nextThread);
+    syscall0(SYSCALL_YIELD);
+    unreachable();
 }
 
-CpuThreadState *schedYield(CpuThreadState *state) {
-    Thread *currentThread;
+CpuThreadState *schedYield() {
+    Thread *currentThread, *nextThread;
 
     currentThread = cpuGlobalState.currentThread;
-
     traceDebug("TID %u yielding...\n", currentThread->id);
 
-    /* TODO: Schedule new thread */
+    nextThread = schedSchedule();
+    if (nextThread == NULL) {
+        return &currentThread->cpuState;
+    }
 
-    return state;
+    /* TODO: Add current thread to runnable list if elgible */
+
+    schedSetCurrentThread(nextThread);
+
+    return &nextThread->cpuState;
 }

@@ -12,6 +12,7 @@
 
 typedef struct Thread {
     ListItem listItem;
+    ListItem schedListItem;
 
     uintn id;
     const char8 *name;
@@ -26,6 +27,6 @@ typedef struct Thread {
     CpuThreadState cpuState;
 } Thread;
 
-Thread *threadCreate(Process *parent, const char8 *name);
+Thread *threadCreate(Process *parent, const char8 *name, void *entry);
 
-void threadArchInitialize(Thread *thread);
+void threadArchInitialize(Thread *thread, void *entry);

@@ -17,13 +17,14 @@
 
 static uintn threadCount = 0;
 
-Thread *threadCreate(Process *parent, const char8 *name) {
+Thread *threadCreate(Process *parent, const char8 *name, void *entry) {
     Thread *thread;
     uintn pageCount;
     Status status;
 
     thread = heapAllocate(sizeof(*thread));
     if (thread == NULL) {
+        traceError("Failed to allocate memory for thread descriptor\n");
         return NULL;
     }
 
@@ -55,7 +56,7 @@ Thread *threadCreate(Process *parent, const char8 *name) {
 
     /* Initialize CPU-specific state */
     memClear(&thread->cpuState, sizeof(thread->cpuState));
-    threadArchInitialize(thread);
+    threadArchInitialize(thread, entry);
 
     /* Finalize registration */
     listAppend(&parent->threads, &thread->listItem);

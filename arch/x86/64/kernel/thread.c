@@ -8,11 +8,12 @@
 #include <cpu/gdt.h>
 #include <thread.h>
 
-void threadArchInitialize(Thread *thread) {
+void threadArchInitialize(Thread *thread, void *entry) {
     CpuThreadState *state;
 
     state = &thread->cpuState;
     state->cs = USER_CS;
+    state->rip = (uint64) entry;
     state->ss = USER_DS;
     state->rsp = (uint64) thread->stack + thread->stackSize;
 }

@@ -8,7 +8,6 @@
 #pragma once
 
 #include <list.h>
-#include <types.h>
 
 typedef struct {
     uintn id;
@@ -17,4 +16,4 @@ typedef struct {
     List threads;
 } Process;
 
-Process *processCreate(const char8 *name);
+Process *processCreate(const char8 *name, void *entry);

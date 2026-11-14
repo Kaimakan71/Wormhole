@@ -13,12 +13,13 @@
 
 static uintn processCount = 0;
 
-Process *processCreate(const char8 *name) {
+Process *processCreate(const char8 *name, void *entry) {
     Process *proc;
     Thread *mainThread;
 
     proc = heapAllocate(sizeof(*proc));
     if (proc == NULL) {
+        traceError("Failed to allocate memory for process descriptor\n");
         return NULL;
     }
 
@@ -28,7 +29,7 @@ Process *processCreate(const char8 *name) {
     listReset(&proc->threads);
 
     /* Create main thread */
-    mainThread = threadCreate(proc, "main");
+    mainThread = threadCreate(proc, "main", entry);
     if (mainThread == NULL) {
         heapFree(proc);
         return NULL;

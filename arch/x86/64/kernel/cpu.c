@@ -29,7 +29,6 @@ void cpuEarlyInitialize() {
 
 Status cpuInitialize() {
     Status status;
-    void *stack;
 
     traceDebug("Initializing CPU...\n");
 
