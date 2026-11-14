@@ -37,7 +37,12 @@ void kernelMain(BootInfo *bootInfo) {
     }
 
     deviceInitialize();
-    cpuInitialize();
+
+    status = cpuInitialize();
+    if (!STATUS_IS_SUCCESS(status)) {
+        logError("Failed to initialize CPU\n");
+        return;
+    }
 
     status = schedInitialize();
     if (!STATUS_IS_SUCCESS(status)) {

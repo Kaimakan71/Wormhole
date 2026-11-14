@@ -3,5 +3,5 @@
 # All rights reserved.
 # Provided under the BSD 3-Clause license.
 
-export SFILES += $(addprefix $(ARCH_DIR)/kernel/,trap.S)
-export CFILES += $(addprefix $(ARCH_DIR)/kernel/,trap.c gdt.c idt.c i8259.c i8253.c i8042.c cpu.c thread.c)
+export SFILES += $(addprefix $(ARCH_DIR)/kernel/,trap.S syscall.S)
+export CFILES += $(addprefix $(ARCH_DIR)/kernel/,trap.c gdt.c idt.c tss.c i8259.c i8253.c i8042.c syscall.c cpu.c thread.c)

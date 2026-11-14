@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <types.h>
+#include <status.h>
 
 #define CACHE_LINE_SIZE 64
 
@@ -21,6 +21,9 @@
     ASMV("cli; hlt"); \
     unreachable();    \
 })
+
+#define FLAGS_IF BIT(9)
+#define FLAGS_DF BIT(10)
 
 static inline uint64 cpuGetRip() {
     uint64 rip;
@@ -43,4 +46,4 @@ static inline void cpuSetCr3(uint64 cr3) {
 }
 
 void cpuEarlyInitialize();
-void cpuInitialize();
+Status cpuInitialize();

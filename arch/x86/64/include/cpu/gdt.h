@@ -11,8 +11,8 @@
 
 #define KERNEL_CS 0x08
 #define KERNEL_DS 0x10
-#define USER_CS   0x18
-#define USER_DS   0x20
+#define USER_DS   0x18
+#define USER_CS   0x20
 
 #define GDT_ENTRY_ATTRIBUTE_ACCESSED    BIT(0)
 #define GDT_ENTRY_ATTRIBUTE_EXECUTABLE  BIT(3)
@@ -31,6 +31,13 @@
 #define GDT_ENTRY_ATTRIBUTE_WRITABLE    BIT(1)
 #define GDT_ENTRY_ATTRIBUTE_EXPAND_DOWN BIT(2)
 
+#define GDT_ENTRY_DPL(dpl) ((dpl) << 5)
+
+#define GDT_ENTRY_COUNT 7
+
+#define GDT_TSS_ENTRY    5
+#define GDT_TSS_SELECTOR 0x28
+
 typedef struct __packed {
     uint16 limitLow;
     uint16 baseLow;
@@ -43,5 +50,7 @@ typedef struct __packed {
     uint16 limit;
     uint64 base;
 } Gdtr;
+
+extern GdtEntry gdt[GDT_ENTRY_COUNT];
 
 void gdtInitialize();

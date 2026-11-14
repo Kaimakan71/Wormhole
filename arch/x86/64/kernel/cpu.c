@@ -11,15 +11,32 @@
 #include <cpu/i8042.h>
 #include <cpu/i8253.h>
 #include <cpu/i8259.h>
+#include <cpu/syscall.h>
+#include <cpu/tss.h>
 
 void cpuEarlyInitialize() {
     gdtInitialize();
     idtInitialize();
 }
 
-void cpuInitialize() {
+Status cpuInitialize() {
+    Status status;
+
+    status = tssInitialize();
+    if (!STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
+    status = syscallInitialize();
+    if (!STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
     i8259Initialize();
     i8253Initialize();
     i8042Initialize();
+
     cpuIntEnable();
+
+    return STATUS_SUCCESS;
 }

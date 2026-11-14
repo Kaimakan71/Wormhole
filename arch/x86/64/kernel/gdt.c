@@ -8,9 +8,7 @@
 #include <cpu.h>
 #include <cpu/gdt.h>
 
-#define GDT_ENTRY_COUNT 5
-
-static __cacheline_aligned const GdtEntry gdt[GDT_ENTRY_COUNT] = {
+__cacheline_aligned GdtEntry gdt[GDT_ENTRY_COUNT] = {
     /* Reserved by CPU */
     {
         .limitLow   = 0x0000,
@@ -27,18 +25,31 @@ static __cacheline_aligned const GdtEntry gdt[GDT_ENTRY_COUNT] = {
         .baseMid    = 0x00,
         .attributes = GDT_ENTRY_ATTRIBUTE_GRANULARITY | GDT_ENTRY_ATTRIBUTE_64BIT_CODE |
                       GDT_ENTRY_ATTRIBUTE_PRESENT     | GDT_ENTRY_ATTRIBUTE_SYSTEM     |
-                      GDT_ENTRY_ATTRIBUTE_EXECUTABLE  | GDT_ENTRY_ATTRIBUTE_READABLE,
+                      GDT_ENTRY_ATTRIBUTE_EXECUTABLE  | GDT_ENTRY_ATTRIBUTE_READABLE   |
+                      GDT_ENTRY_DPL(0),
         .baseHigh   = 0x00,
     },
 
     /* Kernel data */
     {
-        .limitLow  = 0xffff,
-        .baseLow   = 0x0000,
-        .baseMid   = 0x00,
-        .attributes = GDT_ENTRY_ATTRIBUTE_GRANULARITY | GDT_ENTRY_ATTRIBUTE_PRESENT |
-                      GDT_ENTRY_ATTRIBUTE_SYSTEM      | GDT_ENTRY_ATTRIBUTE_WRITABLE,
-        .baseHigh  = 0x00,
+        .limitLow   = 0xffff,
+        .baseLow    = 0x0000,
+        .baseMid    = 0x00,
+        .attributes = GDT_ENTRY_ATTRIBUTE_GRANULARITY | GDT_ENTRY_ATTRIBUTE_PRESENT  |
+                      GDT_ENTRY_ATTRIBUTE_SYSTEM      | GDT_ENTRY_ATTRIBUTE_WRITABLE |
+                      GDT_ENTRY_DPL(0),
+        .baseHigh   = 0x00,
+    },
+
+    /* User data */
+    {
+        .limitLow   = 0xffff,
+        .baseLow    = 0x0000,
+        .baseMid    = 0x00,
+        .attributes = GDT_ENTRY_ATTRIBUTE_GRANULARITY | GDT_ENTRY_ATTRIBUTE_PRESENT  |
+                      GDT_ENTRY_ATTRIBUTE_SYSTEM      | GDT_ENTRY_ATTRIBUTE_WRITABLE |
+                      GDT_ENTRY_DPL(3),
+        .baseHigh   = 0x00,
     },
 
     /* User code */
@@ -48,18 +59,9 @@ static __cacheline_aligned const GdtEntry gdt[GDT_ENTRY_COUNT] = {
         .baseMid    = 0x00,
         .attributes = GDT_ENTRY_ATTRIBUTE_GRANULARITY | GDT_ENTRY_ATTRIBUTE_64BIT_CODE |
                       GDT_ENTRY_ATTRIBUTE_PRESENT     | GDT_ENTRY_ATTRIBUTE_SYSTEM     |
-                      GDT_ENTRY_ATTRIBUTE_EXECUTABLE  | GDT_ENTRY_ATTRIBUTE_READABLE,
+                      GDT_ENTRY_ATTRIBUTE_EXECUTABLE  | GDT_ENTRY_ATTRIBUTE_READABLE   |
+                      GDT_ENTRY_DPL(3),
         .baseHigh   = 0x00,
-    },
-
-    /* User data */
-    {
-        .limitLow  = 0xffff,
-        .baseLow   = 0x0000,
-        .baseMid   = 0x00,
-        .attributes = GDT_ENTRY_ATTRIBUTE_GRANULARITY | GDT_ENTRY_ATTRIBUTE_PRESENT |
-                      GDT_ENTRY_ATTRIBUTE_SYSTEM      | GDT_ENTRY_ATTRIBUTE_WRITABLE,
-        .baseHigh  = 0x00,
     },
 };
 
