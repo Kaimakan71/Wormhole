@@ -5,7 +5,10 @@
  * Provided under the BSD 3-Clause license.
  */
 
+#include <process.h>
 #include <status.h>
 
+extern Process *schedIdleProcess;
+
 Status schedInitialize();
-void schedStart();
+__noreturn void schedStart();

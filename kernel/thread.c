@@ -12,7 +12,8 @@
 
 #define TRACE_SOURCE "thread"
 
-#define STACK_SIZE 0x1000
+#define USER_STACK_SIZE   0x4000
+#define KERNEL_STACK_SIZE 0x1000
 
 static uintn threadCount = 0;
 
@@ -31,15 +32,26 @@ Thread *threadCreate(Process *parent, const char8 *name) {
     thread->name = name;
     thread->parent = parent;
 
-    /* Allocate stack */
-    thread->stackSize = STACK_SIZE;
+    /* Allocate user stack */
+    thread->stackSize = USER_STACK_SIZE;
     pageCount = SIZE_TO_PAGES(thread->stackSize);
     status = vmmAllocatePages(pageCount, &thread->stack);
     if (!STATUS_IS_SUCCESS(status)) {
-        traceError("Failed to allocate %u page(s) for thread stack\n", pageCount);
+        traceError("Failed to allocate %u page(s) for user stack\n", pageCount);
         heapFree(thread);
         return NULL;
     }
+
+    /* Allocate kernel stack */
+    pageCount = SIZE_TO_PAGES(KERNEL_STACK_SIZE);
+    status = vmmAllocatePages(pageCount, &thread->kernelStack);
+    if (!STATUS_IS_SUCCESS(status)) {
+        traceError("Failed to allocate %u page(s) for kernel stack\n", pageCount);
+        vmmFreePages(thread->stack, SIZE_TO_PAGES(thread->stackSize));
+        heapFree(thread);
+        return NULL;
+    }
+    thread->kernelStackTop = (uintn) thread->kernelStack + KERNEL_STACK_SIZE;
 
     /* Initialize CPU-specific state */
     memClear(&thread->cpuState, sizeof(thread->cpuState));

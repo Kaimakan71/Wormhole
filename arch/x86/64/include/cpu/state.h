@@ -7,11 +7,12 @@
 
 #pragma once
 
-#include <types.h>
+typedef struct Thread Thread;
 
 typedef struct __packed {
     uint64 kernelStackTop;
-    uint64 userRsp;
+    uint64 userRspScratch;
+    Thread *currentThread;
 } CpuGlobalState;
 
 typedef struct __packed {

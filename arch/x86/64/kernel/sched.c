@@ -7,16 +7,24 @@
 
 #include <cpu.h>
 #include <cpu/sched.h>
+#include <cpu/state.h>
 #include <cpu/syscall.h>
 #include <log.h>
 #include <sched.h>
+#include <thread.h>
 
 #define TRACE_SOURCE "sched"
 
 #define syscall0(function) ASMV("syscall" : : "a" (function) : "rcx", "r11", "memory")
 
-void schedStart() {
+__noreturn void schedStart() {
+    Thread *idleThread;
+
     traceDebug("Starting scheduler...\n");
+
+    idleThread = (Thread *) schedIdleProcess->threads.first;
+    cpuGlobalState.currentThread = idleThread;
+    cpuGlobalState.kernelStackTop = idleThread->kernelStackTop;
     syscall0(SYSCALL_YIELD);
 
     traceDebug("Idling...\n");
@@ -26,9 +34,13 @@ void schedStart() {
 }
 
 CpuThreadState *schedYield(CpuThreadState *state) {
-    traceDebug("Thread requested yield\n");
+    Thread *currentThread;
 
-    /* TODO: Schedule new thread here */
+    currentThread = cpuGlobalState.currentThread;
+
+    traceDebug("TID %u yielding...\n", currentThread->id);
+
+    /* TODO: Schedule new thread */
 
     return state;
 }

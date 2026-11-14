@@ -38,14 +38,6 @@ Status cpuInitialize() {
         return status;
     }
 
-    /* TODO: Allocate stack per-thread */
-    status = vmmAllocatePages(1, &stack);
-    if (!STATUS_IS_SUCCESS(status)) {
-        traceError("Failed to allocate page for kernel stack\n");
-        return status;
-    }
-    cpuGlobalState.kernelStackTop = (uint64) stack + PAGE_SIZE;
-
     wrmsr(IA32_KERNEL_GS_BASE_MSR, (uint64) &cpuGlobalState);
     syscallInitialize();
     i8259Initialize();

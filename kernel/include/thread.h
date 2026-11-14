@@ -10,7 +10,7 @@
 #include <cpu/state.h>
 #include <process.h>
 
-typedef struct {
+typedef struct Thread {
     ListItem listItem;
 
     uintn id;
@@ -19,6 +19,9 @@ typedef struct {
 
     void *stack;
     uintn stackSize;
+
+    void *kernelStack;
+    uintn kernelStackTop;
 
     CpuThreadState cpuState;
 } Thread;

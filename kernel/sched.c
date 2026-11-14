@@ -12,13 +12,13 @@
 
 #define TRACE_SOURCE "sched"
 
-Status schedInitialize() {
-    Process *idleProcess;
+Process *schedIdleProcess;
 
+Status schedInitialize() {
     traceDebug("Initializing scheduler...\n");
 
-    idleProcess = processCreate("idle");
-    if (idleProcess == NULL) {
+    schedIdleProcess = processCreate("idle");
+    if (schedIdleProcess == NULL) {
         traceError("Failed to create idle process\n");
         return STATUS_UNKNOWN_ERROR;
     }

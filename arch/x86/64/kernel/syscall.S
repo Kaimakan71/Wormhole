@@ -67,14 +67,12 @@ BEGIN_FUNC(syscallEntry)
     pop %rbx
     pop %rax
 
-    pop %rcx /* Ignore vector */
-    pop %rcx /* Ignore error code */
+    pop %rcx /* Vector */
+    pop %rcx /* Error code */
     pop %rcx /* User RIP */
-    pop %r11 /* Ignore CS */
+    pop %r11 /* User CS */
     pop %r11 /* User RFLAGS */
-
-    /* Switch to new user stack */
-    mov %gs:8, %rsp
+    pop %rsp /* User RSP */
 
     swapgs
     sysretq
