@@ -22,18 +22,6 @@ static void schedIdle() {
     }
 }
 
-static void schedRegisterThread(Thread *thread) {
-    listAppend(&schedRunnableThreads, &thread->schedListItem);
-}
-
-static void schedRegisterProcess(Process *process) {
-    ListItem *listItem;
-
-    listEnumerateItems(&process->threads, listItem) {
-        schedRegisterThread((Thread *) listItem);
-    }
-}
-
 Status schedInitialize() {
     Process *idleProcess;
 
@@ -50,6 +38,18 @@ Status schedInitialize() {
     schedRegisterProcess(idleProcess);
 
     return STATUS_SUCCESS;
+}
+
+void schedRegisterThread(Thread *thread) {
+    listAppend(&schedRunnableThreads, &thread->schedListItem);
+}
+
+void schedRegisterProcess(Process *process) {
+    ListItem *listItem;
+
+    listEnumerateItems(&process->threads, listItem) {
+        schedRegisterThread((Thread *) listItem);
+    }
 }
 
 Thread *schedSchedule(Thread *current) {

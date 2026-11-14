@@ -12,14 +12,25 @@
 #include <device.h>
 #include <log.h>
 #include <mm.h>
+#include <process.h>
 #include <sched.h>
 
 static void driversInitialize() {
     pciInitialize();
 }
 
+static void initMain() {
+    logWrite("Welcome to WormholeOS!\n");
+
+    /* TODO: Exit process */
+    for (;;) {
+        cpuPause();
+    }
+}
+
 void kernelMain(BootInfo *bootInfo) {
     Status status;
+    Process *initProcess;
 
     if (bootInfo->signature != BOOT_INFO_SIGNATURE) {
         return;
@@ -51,6 +62,13 @@ void kernelMain(BootInfo *bootInfo) {
     }
 
     driversInitialize();
+
+    initProcess = processCreate("init", initMain);
+    if (initProcess == NULL) {
+        logError("Failed to create init process\n");
+        return;
+    }
+    schedRegisterProcess(initProcess);
 
     status = schedStart();
     if (!STATUS_IS_SUCCESS(status)) {
