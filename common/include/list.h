@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <types.h>
+
 typedef struct ListItem {
     struct ListItem *next;
     struct ListItem *prev;
@@ -29,6 +31,10 @@ static inline void listItemInsert(ListItem *item, ListItem *prev, ListItem *next
     item->prev->next = item;
     item->next = next;
     item->next->prev = item;
+}
+
+static inline bool listIsEmpty(List *list) {
+    return list->first == (ListItem *) list;
 }
 
 static inline void listReset(List *list) {
