@@ -10,4 +10,4 @@
 
 Status schedInitialize();
 Status schedStart();
-Thread *schedSchedule();
+Thread *schedSchedule(Thread *current);

@@ -16,8 +16,21 @@ static List schedRunnableThreads;
 
 static void schedIdle() {
     /* TODO: Run in kernel mode */
+    traceDebug("Idling...\n");
     for (;;) {
         cpuPause();
+    }
+}
+
+static void schedRegisterThread(Thread *thread) {
+    listAppend(&schedRunnableThreads, &thread->schedListItem);
+}
+
+static void schedRegisterProcess(Process *process) {
+    ListItem *listItem;
+
+    listEnumerateItems(&process->threads, listItem) {
+        schedRegisterThread((Thread *) listItem);
     }
 }
 
@@ -34,20 +47,26 @@ Status schedInitialize() {
         return STATUS_UNKNOWN_ERROR;
     }
 
-    listAppend(&schedRunnableThreads, &((Thread *) idleProcess->threads.first)->schedListItem);
+    schedRegisterProcess(idleProcess);
 
     return STATUS_SUCCESS;
 }
 
-Thread *schedSchedule() {
-    Thread *thread;
+Thread *schedSchedule(Thread *current) {
+    Thread *next;
 
     if (listIsEmpty(&schedRunnableThreads)) {
-        return NULL;
+        return current;
     }
 
-    thread = (Thread *) ((uintn) schedRunnableThreads.first - offsetof(Thread, schedListItem));
-    listItemRemove(&thread->schedListItem);
+    /* Get next runnable thread */
+    next = (Thread *) ((uintn) schedRunnableThreads.first - offsetof(Thread, schedListItem));
+    listItemRemove(&next->schedListItem);
 
-    return thread;
+    /* Mark current thread as runnable */
+    if (current != NULL) {
+        schedRegisterThread(current);
+    }
+
+    return next;
 }

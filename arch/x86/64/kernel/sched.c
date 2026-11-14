@@ -27,7 +27,7 @@ Status schedStart() {
 
     traceDebug("Starting scheduler...\n");
 
-    nextThread = schedSchedule();
+    nextThread = schedSchedule(NULL);
     if (nextThread == NULL) {
         return STATUS_UNKNOWN_ERROR;
     }
@@ -41,16 +41,10 @@ CpuThreadState *schedYield() {
     Thread *currentThread, *nextThread;
 
     currentThread = cpuGlobalState.currentThread;
-    traceDebug("TID %u yielding...\n", currentThread->id);
-
-    nextThread = schedSchedule();
-    if (nextThread == NULL) {
-        return &currentThread->cpuState;
+    nextThread = schedSchedule(currentThread);
+    if (nextThread != currentThread) {
+        schedSetCurrentThread(nextThread);
     }
-
-    /* TODO: Add current thread to runnable list if elgible */
-
-    schedSetCurrentThread(nextThread);
 
     return &nextThread->cpuState;
 }
