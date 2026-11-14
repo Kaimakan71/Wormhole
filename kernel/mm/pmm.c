@@ -142,12 +142,12 @@ Status pmmAllocatePages(uintn pageCount, uint64 *physicalAddress) {
         }
 
         /* Move region to used list */
+        marginPageCount = region->pageCount - pageCount;
         region->pageCount = pageCount;
         listItemRemove(listItem);
         listAppend(&mmUsedRegions, listItem);
 
         /* Split remaining pages into seperate region */
-        marginPageCount = region->pageCount - pageCount;
         if (marginPageCount > 0) {
             marginRegion = pmmCreateRegion();
             if (marginRegion != NULL) {
