@@ -5,20 +5,14 @@
  * Provided under the BSD 3-Clause license.
  */
 
-#include <mm.h>
+#include <cpu/gdt.h>
 #include <thread.h>
 
-Thread *threadCreate(Process *parent, const char8 *name) {
-    Thread *thread;
+void threadArchInitialize(Thread *thread) {
+    CpuThreadState *state;
 
-    thread = heapAllocate(sizeof(*thread));
-    if (thread == NULL) {
-        return NULL;
-    }
-
-    thread->name = name;
-    thread->parent = parent;
-    listAppend(&parent->threads, &thread->listItem);
-
-    return thread;
+    state = &thread->cpuState;
+    state->cs = USER_CS;
+    state->ss = USER_DS;
+    state->rsp = (uint64) thread->stack + thread->stackSize;
 }

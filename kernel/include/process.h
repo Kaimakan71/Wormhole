@@ -11,7 +11,9 @@
 #include <types.h>
 
 typedef struct {
+    uintn id;
     const char8 *name;
+
     List threads;
 } Process;
 

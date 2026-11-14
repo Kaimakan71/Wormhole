@@ -21,7 +21,7 @@ include $(ARCH_DIR)/kernel/build.mk
 export CFILES +=                                     \
 	console.c log.c                                  \
 	$(addprefix mm/,pmm.c vmm.c heap.c mm.c)         \
-	device.c process.c sched.c                       \
+	device.c thread.c process.c sched.c              \
 	$(addprefix ../drivers/bus/pci/,strings.c pci.c) \
 	main.c
 
