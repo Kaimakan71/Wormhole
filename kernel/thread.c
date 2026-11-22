@@ -15,11 +15,13 @@
 #define USER_STACK_SIZE   0x4000
 #define KERNEL_STACK_SIZE 0x1000
 
-static uintn threadCount = 0;
+#define USER_STACK_PAGES   SIZE_TO_PAGES(USER_STACK_SIZE)
+#define KERNEL_STACK_PAGES SIZE_TO_PAGES(KERNEL_STACK_SIZE)
+
+static uintn nextThreadId = 0;
 
 Thread *threadCreate(Process *parent, const char8 *name, void *entry) {
     Thread *thread;
-    uintn userPageCount, kernelPageCount;
     Status status;
 
     thread = heapAllocate(sizeof(*thread));
@@ -29,26 +31,24 @@ Thread *threadCreate(Process *parent, const char8 *name, void *entry) {
     }
 
     /* Initialize metadata */
-    thread->id = threadCount;
+    thread->id = nextThreadId++;
     thread->name = name;
     thread->parent = parent;
 
     /* Allocate user stack */
     thread->stackSize = USER_STACK_SIZE;
-    userPageCount = SIZE_TO_PAGES(thread->stackSize);
-    status = vmmAllocatePages(userPageCount, &thread->stack);
+    status = vmmAllocatePages(USER_STACK_PAGES, &thread->stack);
     if (!STATUS_IS_SUCCESS(status)) {
-        traceError("Failed to allocate %u page(s) for user stack\n", userPageCount);
+        traceError("Failed to allocate %u page(s) for user stack\n", USER_STACK_PAGES);
         heapFree(thread);
         return NULL;
     }
 
     /* Allocate kernel stack */
-    kernelPageCount = SIZE_TO_PAGES(KERNEL_STACK_SIZE);
-    status = vmmAllocatePages(kernelPageCount, &thread->kernelStack);
+    status = vmmAllocatePages(KERNEL_STACK_PAGES, &thread->kernelStack);
     if (!STATUS_IS_SUCCESS(status)) {
-        traceError("Failed to allocate %u page(s) for kernel stack\n", kernelPageCount);
-        vmmFreePages(thread->stack, userPageCount);
+        traceError("Failed to allocate %u page(s) for kernel stack\n", KERNEL_STACK_PAGES);
+        vmmFreePages(thread->stack, USER_STACK_PAGES);
         heapFree(thread);
         return NULL;
     }
@@ -60,8 +60,18 @@ Thread *threadCreate(Process *parent, const char8 *name, void *entry) {
 
     /* Finalize registration */
     listAppend(&parent->threads, &thread->listItem);
-    threadCount++;
     traceDebug("Created thread \"%s\" (TID %u)\n", thread->name, thread->id);
 
     return thread;
+}
+
+void threadDestroy(Thread *thread) {
+    listItemRemove(&thread->listItem);
+
+    vmmFreePages(thread->stack, USER_STACK_PAGES);
+    vmmFreePages(thread->kernelStack, KERNEL_STACK_PAGES);
+
+    /* TODO: Destroy parent process if necessary */
+
+    heapFree(thread);
 }

@@ -22,9 +22,29 @@ static Thread *schedIdleThread;
 static TimerDevice *schedTimerDevice;
 
 static __noreturn void schedIdle() {
-    for (;;) {
-        cpuHalt();
+    /* TODO: Use cpuHalt() */
+    for (;;);
+}
+
+static CpuThreadState *schedBlock(Thread *thread, CpuThreadState *threadState) {
+    Thread *nextThread;
+
+    /* Save current thread */
+    thread->cpuState = threadState;
+
+    /* Select next thread */
+    if (!listIsEmpty(&schedRunnableThreads)) {
+        nextThread = (Thread *) ((uintn) schedRunnableThreads.first - offsetof(Thread, schedListItem));
+        listItemRemove(&nextThread->schedListItem);
+    } else {
+        /* Nothing better to switch to */
+        nextThread = schedIdleThread;
     }
+
+    /* Switch to next thread */
+    traceDebug("TID %u blocked, switching to %u...\n", thread->id, nextThread->id);
+    threadArchSetCurrent(nextThread);
+    return nextThread->cpuState;
 }
 
 static CpuThreadState *schedTick(CpuThreadState *threadState) {
@@ -47,6 +67,7 @@ static CpuThreadState *schedTick(CpuThreadState *threadState) {
     listItemRemove(&nextThread->schedListItem);
 
     /* Switch to next thread */
+    traceDebug("TID %u preempted, switching to %u...\n", currentThread->id, nextThread->id);
     threadArchSetCurrent(nextThread);
     return nextThread->cpuState;
 }
@@ -90,4 +111,13 @@ __noreturn void schedStart() {
     schedTimerDevice->onTick = schedTick;
 
     schedIdle();
+}
+
+CpuThreadState *schedThreadExit(Thread *thread, CpuThreadState *threadState) {
+    threadState = schedBlock(thread, threadState);
+
+    traceDebug("TID %u exited\n", thread->id);
+    threadDestroy(thread);
+
+    return threadState;
 }

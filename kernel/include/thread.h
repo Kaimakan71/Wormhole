@@ -28,6 +28,7 @@ typedef struct Thread {
 } Thread;
 
 Thread *threadCreate(Process *parent, const char8 *name, void *entry);
+void threadDestroy(Thread *thread);
 
 void threadArchInitialize(Thread *thread, void *entry);
 Thread *threadArchGetCurrent();

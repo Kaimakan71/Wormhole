@@ -10,23 +10,14 @@
 #include <cpu/state.h>
 #include <cpu/syscall.h>
 #include <log.h>
+#include <sched.h>
 
 #define TRACE_SOURCE "syscall"
 
 extern void syscallEntry();
 
-static CpuThreadState *sysThreadExit(Thread *thread, CpuThreadState *threadState) {
-    (void) thread;
-    (void) threadState;
-
-    /* TODO: Implement this routine */
-    traceDebug("TODO: Implement sysThreadExit()\n");
-
-    cpuHang();
-}
-
 static __cacheline_aligned CpuThreadState *(*syscallTable[])(Thread *, CpuThreadState *) = {
-    [SYSCALL_THREAD_EXIT]  = sysThreadExit,
+    [SYSCALL_THREAD_EXIT] = schedThreadExit,
 };
 
 void syscallInitialize() {

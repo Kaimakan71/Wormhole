@@ -12,3 +12,5 @@ Status schedInitialize();
 void schedRegisterThread(Thread *thread);
 void schedRegisterProcess(Process *process);
 __noreturn void schedStart();
+
+CpuThreadState *schedThreadExit(Thread *thread, CpuThreadState *threadState);
