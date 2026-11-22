@@ -17,7 +17,7 @@ typedef struct __packed {
     Thread *currentThread;
 } CpuGlobalState;
 
-typedef struct __packed {
+typedef struct __packed CpuThreadState {
     uint64 r15;
     uint64 r14;
     uint64 r13;

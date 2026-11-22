@@ -7,8 +7,11 @@
 
 #pragma once
 
-#include <cpu/state.h>
 #include <process.h>
+
+#define THREAD_FLAG_KERNEL BIT(0)
+
+typedef struct CpuThreadState CpuThreadState;
 
 typedef struct Thread {
     ListItem listItem;
@@ -16,6 +19,7 @@ typedef struct Thread {
 
     uintn id;
     const char8 *name;
+    uint8 flags;
     Process *parent;
 
     void *stack;
@@ -27,9 +31,10 @@ typedef struct Thread {
     CpuThreadState *cpuState;
 } Thread;
 
-Thread *threadCreate(Process *parent, const char8 *name, void *entry);
+Thread *threadCreate(Process *parent, const char8 *name, uint8 flags, void *entry);
 void threadDestroy(Thread *thread);
 
 void threadArchInitialize(Thread *thread, void *entry);
 Thread *threadArchGetCurrent();
 void threadArchSetCurrent(Thread *thread);
+__noreturn void threadArchSwitchTo(Thread *thread);

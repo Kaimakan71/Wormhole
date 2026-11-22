@@ -6,8 +6,12 @@
  */
 
 #include <cpu/gdt.h>
+#include <cpu/state.h>
 #include <cpu/tss.h>
 #include <thread.h>
+
+extern __noreturn void threadArchSwitchToUser(CpuThreadState *cpuState);
+extern __noreturn void threadArchSwitchToKernel(CpuThreadState *cpuState);
 
 void threadArchInitialize(Thread *thread, void *entry) {
     CpuThreadState *state;
@@ -20,7 +24,7 @@ void threadArchInitialize(Thread *thread, void *entry) {
     thread->cpuState = state;
 }
 
-/* TODO: Make these inline */
+/* TODO: Make make these inline */
 
 Thread *threadArchGetCurrent() {
     return cpuGlobalState.currentThread;
@@ -30,4 +34,14 @@ void threadArchSetCurrent(Thread *thread) {
     cpuGlobalState.currentThread = thread;
     cpuGlobalState.kernelStackTop = thread->kernelStackTop;
     tss.rsp0 = thread->kernelStackTop;
+}
+
+__noreturn void threadArchSwitchTo(Thread *thread) {
+    threadArchSetCurrent(thread);
+
+    if (thread->flags & THREAD_FLAG_KERNEL) {
+        threadArchSwitchToKernel(thread->cpuState);
+    } else {
+        threadArchSwitchToUser(thread->cpuState);
+    }
 }

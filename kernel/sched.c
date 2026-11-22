@@ -22,29 +22,23 @@ static Thread *schedIdleThread;
 static TimerDevice *schedTimerDevice;
 
 static __noreturn void schedIdle() {
-    /* TODO: Use cpuHalt() */
-    for (;;);
+    for (;;) {
+        cpuHalt();
+    }
 }
 
-static CpuThreadState *schedBlock(Thread *thread, CpuThreadState *threadState) {
+static Thread *schedSchedule() {
     Thread *nextThread;
 
-    /* Save current thread */
-    thread->cpuState = threadState;
-
-    /* Select next thread */
-    if (!listIsEmpty(&schedRunnableThreads)) {
-        nextThread = (Thread *) ((uintn) schedRunnableThreads.first - offsetof(Thread, schedListItem));
-        listItemRemove(&nextThread->schedListItem);
-    } else {
+    if (listIsEmpty(&schedRunnableThreads)) {
         /* Nothing better to switch to */
-        nextThread = schedIdleThread;
+        return schedIdleThread;
     }
 
-    /* Switch to next thread */
-    traceDebug("TID %u blocked, switching to %u...\n", thread->id, nextThread->id);
-    threadArchSetCurrent(nextThread);
-    return nextThread->cpuState;
+    nextThread = (Thread *) ((uintn) schedRunnableThreads.first - offsetof(Thread, schedListItem));
+    listItemRemove(&nextThread->schedListItem);
+
+    return nextThread;
 }
 
 static CpuThreadState *schedTick(CpuThreadState *threadState) {
@@ -67,7 +61,6 @@ static CpuThreadState *schedTick(CpuThreadState *threadState) {
     listItemRemove(&nextThread->schedListItem);
 
     /* Switch to next thread */
-    traceDebug("TID %u preempted, switching to %u...\n", currentThread->id, nextThread->id);
     threadArchSetCurrent(nextThread);
     return nextThread->cpuState;
 }
@@ -77,7 +70,7 @@ Status schedInitialize() {
 
     listReset(&schedRunnableThreads);
 
-    schedIdleProcess = processCreate("idle", (void *) schedIdle);
+    schedIdleProcess = processCreate("idle", THREAD_FLAG_KERNEL, (void *) schedIdle);
     if (schedIdleProcess == NULL) {
         traceError("Failed to create idle process\n");
         return STATUS_UNKNOWN_ERROR;
@@ -113,11 +106,9 @@ __noreturn void schedStart() {
     schedIdle();
 }
 
-CpuThreadState *schedThreadExit(Thread *thread, CpuThreadState *threadState) {
-    threadState = schedBlock(thread, threadState);
-
+Status schedThreadExit(Thread *thread) {
     traceDebug("TID %u exited\n", thread->id);
     threadDestroy(thread);
 
-    return threadState;
+    threadArchSwitchTo(schedSchedule());
 }

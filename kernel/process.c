@@ -13,7 +13,7 @@
 
 static uintn processCount = 0;
 
-Process *processCreate(const char8 *name, void *entry) {
+Process *processCreate(const char8 *name, uint8 threadFlags, void *entry) {
     Process *proc;
     Thread *mainThread;
 
@@ -29,7 +29,7 @@ Process *processCreate(const char8 *name, void *entry) {
     listReset(&proc->threads);
 
     /* Create main thread */
-    mainThread = threadCreate(proc, "main", entry);
+    mainThread = threadCreate(proc, "main", threadFlags, entry);
     if (mainThread == NULL) {
         heapFree(proc);
         return NULL;

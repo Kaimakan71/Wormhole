@@ -47,10 +47,7 @@ BEGIN_FUNC(syscallEntry)
     mov %rax, %rsi
     call syscallDispatch
 
-    /* Switch to new kernel stack */
-    mov %rax, %rsp
-
-    /* Restore new thread state */
+    /* Restore thread state */
     pop %r15
     pop %r14
     pop %r13

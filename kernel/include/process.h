@@ -16,4 +16,4 @@ typedef struct {
     List threads;
 } Process;
 
-Process *processCreate(const char8 *name, void *entry);
+Process *processCreate(const char8 *name, uint8 threadFlags, void *entry);

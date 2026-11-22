@@ -60,7 +60,7 @@ void kernelMain(BootInfo *bootInfo) {
 
     driversInitialize();
 
-    initProcess = processCreate("init", initMain);
+    initProcess = processCreate("init", 0, initMain);
     if (initProcess == NULL) {
         logError("Failed to create init process\n");
         return;

@@ -16,7 +16,7 @@
 
 extern void syscallEntry();
 
-static __cacheline_aligned CpuThreadState *(*syscallTable[])(Thread *, CpuThreadState *) = {
+static __cacheline_aligned Status (*syscallTable[])(Thread *) = {
     [SYSCALL_THREAD_EXIT] = schedThreadExit,
 };
 
@@ -36,12 +36,14 @@ void syscallInitialize() {
     wrmsr(IA32_EFER_MSR, efer);
 }
 
-CpuThreadState *syscallDispatch(CpuThreadState *state, uintn function) {
+void syscallDispatch(CpuThreadState *state, uintn function) {
+    Status status;
+
     if (function < ARRAY_LENGTH(syscallTable)) {
-        state = syscallTable[function](cpuGlobalState.currentThread, state);
+        status = syscallTable[function](cpuGlobalState.currentThread);
     } else {
-        state->rax = STATUS_UNSUPPORTED;
+        status = STATUS_UNSUPPORTED;
     }
 
-    return state;
+    state->rax = status;
 }

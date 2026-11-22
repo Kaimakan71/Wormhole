@@ -20,7 +20,7 @@
 
 static uintn nextThreadId = 0;
 
-Thread *threadCreate(Process *parent, const char8 *name, void *entry) {
+Thread *threadCreate(Process *parent, const char8 *name, uint8 flags, void *entry) {
     Thread *thread;
     Status status;
 
@@ -33,6 +33,7 @@ Thread *threadCreate(Process *parent, const char8 *name, void *entry) {
     /* Initialize metadata */
     thread->id = nextThreadId++;
     thread->name = name;
+    thread->flags = flags;
     thread->parent = parent;
 
     /* Allocate user stack */
