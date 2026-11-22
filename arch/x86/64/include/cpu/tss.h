@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cpu.h>
 #include <status.h>
 
 typedef struct __packed {
@@ -37,4 +38,6 @@ typedef struct __packed {
     uint16 iopb;
 } Tss;
 
-Status tssInitialize();
+extern __cacheline_aligned Tss tss;
+
+void tssInitialize();
