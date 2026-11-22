@@ -6,36 +6,36 @@
  */
 
 #include <cpu.h>
+#include <cpu/i8253.h>
 #include <log.h>
-#include <process.h>
 #include <sched.h>
 
 #define TRACE_SOURCE "sched"
 
+#define SCHED_TICK_FREQUENCY 1
+
 static List schedRunnableThreads;
 
-static void schedIdle() {
-    /* TODO: Run in kernel mode */
-    traceDebug("Idling...\n");
+static TimerDevice *schedTimerDevice;
+
+static __noreturn void schedIdle() {
     for (;;) {
-        cpuPause();
+        cpuHalt();
     }
 }
 
+static CpuThreadState *schedTick(CpuThreadState *threadState) {
+    return threadState;
+}
+
 Status schedInitialize() {
-    Process *idleProcess;
 
     traceDebug("Initializing scheduler...\n");
 
     listReset(&schedRunnableThreads);
 
-    idleProcess = processCreate("idle", (void *) schedIdle);
-    if (idleProcess == NULL) {
-        traceError("Failed to create idle process\n");
-        return STATUS_UNKNOWN_ERROR;
-    }
-
-    schedRegisterProcess(idleProcess);
+    /* TODO: Dynamically select timer device */
+    schedTimerDevice = &i8253TimerDevice;
 
     return STATUS_SUCCESS;
 }
@@ -52,21 +52,11 @@ void schedRegisterProcess(Process *process) {
     }
 }
 
-Thread *schedSchedule(Thread *current) {
-    Thread *next;
+__noreturn void schedStart() {
+    traceDebug("Starting scheduler...\n");
 
-    if (listIsEmpty(&schedRunnableThreads)) {
-        return current;
-    }
+    schedTimerDevice->ops->setFrequency(schedTimerDevice, SCHED_TICK_FREQUENCY);
+    schedTimerDevice->onTick = schedTick;
 
-    /* Get next runnable thread */
-    next = (Thread *) ((uintn) schedRunnableThreads.first - offsetof(Thread, schedListItem));
-    listItemRemove(&next->schedListItem);
-
-    /* Mark current thread as runnable */
-    if (current != NULL) {
-        schedRegisterThread(current);
-    }
-
-    return next;
+    schedIdle();
 }

@@ -9,6 +9,7 @@
 #include <bus/pci.h>
 #include <console.h>
 #include <cpu.h>
+#include <cpu/syscall.h>
 #include <device.h>
 #include <log.h>
 #include <mm.h>
@@ -21,11 +22,7 @@ static void driversInitialize() {
 
 static void initMain() {
     logWrite("Welcome to WormholeOS!\n");
-
-    /* TODO: Exit process */
-    for (;;) {
-        cpuPause();
-    }
+    syscall0(SYSCALL_THREAD_EXIT);
 }
 
 void kernelMain(BootInfo *bootInfo) {
@@ -68,11 +65,7 @@ void kernelMain(BootInfo *bootInfo) {
         logError("Failed to create init process\n");
         return;
     }
-    schedRegisterProcess(initProcess);
 
-    status = schedStart();
-    if (!STATUS_IS_SUCCESS(status)) {
-        logError("Failed to start scheduler\n");
-        return;
-    }
+    schedRegisterProcess(initProcess);
+    schedStart();
 }

@@ -11,5 +11,4 @@
 Status schedInitialize();
 void schedRegisterThread(Thread *thread);
 void schedRegisterProcess(Process *process);
-Status schedStart();
-Thread *schedSchedule(Thread *current);
+__noreturn void schedStart();
