@@ -9,30 +9,49 @@
 
 #include <types.h>
 
-static inline void memFill(void *dest, uint8 value, uintn count) {
+static inline void memFill(void *destination, uint8 value, uintn count) {
     uint8 *d;
 
-    d = dest;
+    d = destination;
     while (count--) {
         *d++ = value;
     }
 }
 
-static inline void memClear(void *dest, uintn count) {
-    memFill(dest, 0, count);
+static inline void memClear(void *destination, uintn count) {
+    memFill(destination, 0, count);
 }
 
-static inline void memCopy(void *dest, void *src, uintn count) {
-    uint8 *d, *s;
+static inline void memCopy(void *destination, const void *source, uintn count) {
+    uint8 *d;
+    const uint8 *s;
 
-    d = dest;
-    s = src;
+    d = destination;
+    s = source;
     while (count--) {
         *d++ = *s++;
     }
 }
 
-static inline void memMove(void *dest, void *src, uintn count) {
-    /* TODO: Handle overlap */
-    memCopy(dest, src, count);
+static inline void memMove(void *destination, const void *source, uintn count) {
+    uint8 *d;
+    const uint8 *s;
+
+    if (destination == source || count == 0) {
+        return;
+    }
+
+    d = destination;
+    s = source;
+    if (d < s) {
+        while (count--) {
+            *d++ = *s++;
+        }
+    } else {
+        d += count;
+        s += count;
+        while (count--) {
+            *--d = *--s;
+        }
+    }
 }

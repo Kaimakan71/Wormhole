@@ -106,32 +106,28 @@ uintn stringFormat8(char8 *buffer, uintn bufferLength, const char8 *format, VaLi
             bits = 8 * sizeof(uintn);
         }
 
-        switch (*format) {
+        switch (*format++) {
         case 'x':
-            format++;
             len = writeHexadecimal(buffer, rem, vaListPop(arguments, uintn), bits);
             buffer += len;
             rem -= len;
             break;
         case 'u':
-            format++;
             len = writeDecimal(buffer, rem, vaListPop(arguments, uintn), bits);
             buffer += len;
             rem -= len;
             break;
         case 's':
-            format++;
             len = writeString(buffer, rem, vaListPop(arguments, const char8 *));
             buffer += len;
             rem -= len;
             break;
         case 'c':
-            format++;
             *buffer++ = (char8) vaListPop(arguments, int32);
             rem--;
             break;
         case '%':
-            *buffer++ = *format++;
+            *buffer++ = '%';
             rem--;
             break;
         default:
@@ -141,5 +137,5 @@ uintn stringFormat8(char8 *buffer, uintn bufferLength, const char8 *format, VaLi
 
     *buffer = '\0';
 
-    return bufferLength - rem;
+    return bufferLength - rem - 1;
 }

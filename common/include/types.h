@@ -78,7 +78,7 @@ typedef __builtin_va_list VaList;
 #define CLEAR_BIT(x, b) CLEAR_BITS(x, b)
 
 /*
- * Compiler attributes.
+ * Attributes.
  */
 
 #define __align(n)  __attribute__((__aligned__((n))))

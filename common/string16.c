@@ -106,32 +106,28 @@ uintn stringFormat16(char16 *buffer, uintn bufferLength, const char16 *format, V
             bits = 8 * sizeof(uintn);
         }
 
-        switch (*format) {
+        switch (*format++) {
         case L'x':
-            format++;
             len = writeHexadecimal(buffer, rem, vaListPop(arguments, uintn), bits);
             buffer += len;
             rem -= len;
             break;
         case L'u':
-            format++;
             len = writeDecimal(buffer, rem, vaListPop(arguments, uintn), bits);
             buffer += len;
             rem -= len;
             break;
         case L's':
-            format++;
             len = writeString(buffer, rem, vaListPop(arguments, const char16 *));
             buffer += len;
             rem -= len;
             break;
         case L'c':
-            format++;
             *buffer++ = (char16) vaListPop(arguments, int32);
             rem--;
             break;
         case L'%':
-            *buffer++ = *format++;
+            *buffer++ = L'%';
             rem--;
             break;
         default:
@@ -141,5 +137,5 @@ uintn stringFormat16(char16 *buffer, uintn bufferLength, const char16 *format, V
 
     *buffer = L'\0';
 
-    return bufferLength - rem;
+    return bufferLength - rem - 1;
 }
