@@ -12,7 +12,7 @@
 
 #define TRACE_SOURCE "sched"
 
-#define SCHED_TICK_FREQUENCY 1
+#define SCHED_TICK_FREQUENCY 1000
 
 static List schedRunnableThreads;
 
