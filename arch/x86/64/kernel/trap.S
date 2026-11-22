@@ -66,7 +66,7 @@ BEGIN_FUNC(isr##vector);    \
     call trapException;     \
     tfPop vector;           \
     sti;                    \
-    iret;                   \
+    iretq;                  \
 END_FUNC(isr##vector);
 trapEnumerateVectors(trapMakeIsr)
 
@@ -78,7 +78,7 @@ BEGIN_FUNC(isr##vector);             \
     call dispatch;                   \
     mov %rax, %rsp;                  \
     tfPop vector;                    \
-    iret;                            \
+    iretq;                           \
 END_FUNC(isr##vector);
 
 irqMakeIsr(32, i8253TimerIsr)
