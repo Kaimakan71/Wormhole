@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cpu/state.h>
 #include <list.h>
 
 typedef struct {
@@ -20,6 +21,23 @@ typedef struct {
     const char8 *name;
     DeviceClass *class;
 } Device;
+
+typedef struct TimerDevice TimerDevice;
+
+typedef struct {
+    void (*setFrequency)(TimerDevice *device, uint64 frequency);
+} TimerDeviceOps;
+
+typedef struct TimerDevice {
+    Device device;
+    const TimerDeviceOps *ops;
+    CpuThreadState *(*onTick)(CpuThreadState *cpuState);
+} TimerDevice;
+
+typedef struct {
+    Device device;
+    void (*onKeyPress)(char8 ch);
+} KeyboardDevice;
 
 extern DeviceClass deviceClassTimer;
 extern DeviceClass deviceClassKeyboard;

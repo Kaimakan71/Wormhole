@@ -12,11 +12,11 @@
 #define TRACE_SOURCE "device"
 
 DeviceClass deviceClassTimer = {
-    .name = "timer",
+    .name = "Timer",
 };
 
 DeviceClass deviceClassKeyboard = {
-    .name = "keyboard",
+    .name = "Keyboard",
 };
 
 static List deviceClasses;
