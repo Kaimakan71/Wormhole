@@ -5,37 +5,22 @@
  * Provided under the BSD 3-Clause license.
  */
 
-#include <cpu.h>
 #include <cpu/gdt.h>
 #include <cpu/tss.h>
 #include <log.h>
 #include <memory.h>
-#include <mm.h>
 
 #define TRACE_SOURCE "tss"
 
-#define STACK_SIZE 0x1000
+__cacheline_aligned Tss tss;
 
-static __cacheline_aligned Tss tss;
-
-Status tssInitialize() {
-    uintn pageCount;
-    Status status;
-    void *stack;
+void tssInitialize() {
     uint64 base;
     TssDescriptor *desc;
 
     traceDebug("Initializing TSS...\n");
 
-    pageCount = SIZE_TO_PAGES(STACK_SIZE);
-    status = vmmAllocatePages(pageCount, &stack);
-    if (!STATUS_IS_SUCCESS(status)) {
-        traceError("Failed to allocate %u page(s) for TSS stack\n", pageCount);
-        return status;
-    }
-
     memClear(&tss, sizeof(tss));
-    tss.rsp0 = (uint64) stack;
 
     base = (uint64) &tss;
     desc = (TssDescriptor *) &gdt[GDT_TSS_ENTRY];
@@ -49,6 +34,4 @@ Status tssInitialize() {
     desc->reserved = 0;
 
     ASMV("ltr %0" : : "rm" (GDT_TSS_SELECTOR) : "memory");
-
-    return STATUS_SUCCESS;
 }

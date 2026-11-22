@@ -5,7 +5,6 @@
  * Provided under the BSD 3-Clause license.
  */
 
-#include <cpu.h>
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
 #include <cpu/i8042.h>
@@ -16,7 +15,6 @@
 #include <cpu/syscall.h>
 #include <cpu/tss.h>
 #include <log.h>
-#include <mm.h>
 
 #define TRACE_SOURCE "cpu"
 
@@ -28,16 +26,10 @@ void cpuPreInitialize() {
 }
 
 Status cpuInitialize() {
-    Status status;
-
     traceDebug("Initializing CPU...\n");
 
-    status = tssInitialize();
-    if (!STATUS_IS_SUCCESS(status)) {
-        return status;
-    }
-
     wrmsr(IA32_KERNEL_GS_BASE_MSR, (uint64) &cpuGlobalState);
+    tssInitialize();
     i8259Initialize();
     i8253Initialize();
     i8042Initialize();
