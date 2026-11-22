@@ -24,9 +24,11 @@ typedef struct Thread {
     void *kernelStack;
     uintn kernelStackTop;
 
-    CpuThreadState cpuState;
+    CpuThreadState *cpuState;
 } Thread;
 
 Thread *threadCreate(Process *parent, const char8 *name, void *entry);
 
 void threadArchInitialize(Thread *thread, void *entry);
+Thread *threadArchGetCurrent();
+void threadArchSetCurrent(Thread *thread);
