@@ -5,7 +5,6 @@
  * Provided under the BSD 3-Clause license.
  */
 
-#include <cpu.h>
 #include <cpu/gdt.h>
 #include <cpu/idt.h>
 #include <cpu/trap.h>

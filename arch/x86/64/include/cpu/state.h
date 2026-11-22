@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <types.h>
+#include <cpu.h>
 
 typedef struct Thread Thread;
 
@@ -43,4 +43,4 @@ typedef struct __packed {
     uint64 ss;
 } CpuThreadState;
 
-extern CpuGlobalState cpuGlobalState;
+extern __cacheline_aligned CpuGlobalState cpuGlobalState;

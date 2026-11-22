@@ -14,7 +14,7 @@
 
 #ifndef __ASSEMBLER__
 
-#include <types.h>
+#include <cpu.h>
 
 #define GDT_ENTRY_ATTRIBUTE_ACCESSED    BIT(0)
 #define GDT_ENTRY_ATTRIBUTE_EXECUTABLE  BIT(3)
@@ -53,7 +53,7 @@ typedef struct __packed {
     uint64 base;
 } Gdtr;
 
-extern GdtEntry gdt[GDT_ENTRY_COUNT];
+extern __cacheline_aligned GdtEntry gdt[GDT_ENTRY_COUNT];
 
 void gdtInitialize();
 

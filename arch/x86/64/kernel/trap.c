@@ -6,7 +6,6 @@
  */
 
 #include <console.h>
-#include <cpu.h>
 #include <cpu/state.h>
 #include <log.h>
 
