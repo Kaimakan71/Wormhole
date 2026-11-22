@@ -5,6 +5,7 @@
  * Provided under the BSD 3-Clause license.
  */
 
+#include <cpu.h>
 #include <cpu/gdt.h>
 #include <cpu/tss.h>
 #include <log.h>
@@ -15,7 +16,7 @@
 
 #define STACK_SIZE 0x1000
 
-static Tss tss;
+static __cacheline_aligned Tss tss;
 
 Status tssInitialize() {
     uintn pageCount;

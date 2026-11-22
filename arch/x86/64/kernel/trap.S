@@ -57,16 +57,28 @@
     .endif
 .endm
 
-#define MAKE_EXCEPT_ISR(vector) \
-.align 16;                      \
-BEGIN_FUNC(isr##vector);        \
-    cli;                        \
-    tfPush vector;              \
-    mov %rsp, %rdi;             \
-    call trapException;         \
-    tfPop vector;               \
-    sti;                        \
-    iretq;                      \
+#define trapMakeIsr(vector) \
+.align 16;                  \
+BEGIN_FUNC(isr##vector);    \
+    cli;                    \
+    tfPush vector;          \
+    mov %rsp, %rdi;         \
+    call trapException;     \
+    tfPop vector;           \
+    sti;                    \
+    iret;                   \
+END_FUNC(isr##vector);
+trapEnumerateVectors(trapMakeIsr)
+
+#define irqMakeIsr(vector, dispatch) \
+.align 16;                           \
+BEGIN_FUNC(isr##vector);             \
+    tfPush vector;                   \
+    mov %rsp, %rdi;                  \
+    call dispatch;                   \
+    mov %rax, %rsp;                  \
+    tfPop vector;                    \
+    iret;                            \
 END_FUNC(isr##vector);
 
-ENUM_EXCEPT_VECTORS(MAKE_EXCEPT_ISR)
+irqMakeIsr(32, i8253TimerIsr)

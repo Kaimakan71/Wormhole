@@ -22,7 +22,7 @@
 
 __cacheline_aligned CpuGlobalState cpuGlobalState;
 
-void cpuEarlyInitialize() {
+void cpuPreInitialize() {
     gdtInitialize();
     idtInitialize();
 }
@@ -38,10 +38,10 @@ Status cpuInitialize() {
     }
 
     wrmsr(IA32_KERNEL_GS_BASE_MSR, (uint64) &cpuGlobalState);
-    syscallInitialize();
     i8259Initialize();
     i8253Initialize();
     i8042Initialize();
+    syscallInitialize();
 
     cpuIntEnable();
 

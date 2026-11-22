@@ -19,6 +19,13 @@ static const Idtr idtr = {
     .base  = (uint64) &idt[0],
 };
 
+void idtInitialize() {
+    #define setTrap(vector) idtSetVector(vector, (uint64) isr##vector, 0, IDT_ENTRY_TYPE_TRAP, 0);
+    trapEnumerateVectors(setTrap);
+
+    ASMV("lidt %0" : : "m" (idtr) : "memory");
+}
+
 void idtSetVector(uint8 vector, uint64 offset, uint8 ist, uint8 type, uint8 dpl) {
     IdtEntry *entry;
 
@@ -34,11 +41,4 @@ void idtSetVector(uint8 vector, uint64 offset, uint8 ist, uint8 type, uint8 dpl)
     entry->offsetMid = (offset >> 16) & 0xffff;
     entry->offsetHigh = offset >> 32;
     entry->reserved2 = 0;
-}
-
-void idtInitialize() {
-    #define INIT_EXCEPTION_ENTRY(vector) idtSetVector(vector, (uint64) isr##vector, 0, IDT_ENTRY_TYPE_TRAP, 0);
-    ENUM_EXCEPT_VECTORS(INIT_EXCEPTION_ENTRY);
-
-    ASMV("lidt %0" : : "m" (idtr) : "memory");
 }

@@ -35,10 +35,10 @@
 
 #define GDT_ENTRY_DPL(dpl) ((dpl) << 5)
 
-#define GDT_ENTRY_COUNT 7
-
 #define GDT_TSS_ENTRY    5
 #define GDT_TSS_SELECTOR 0x28
+
+#define GDT_ENTRY_COUNT 7
 
 typedef struct __packed {
     uint16 limitLow;

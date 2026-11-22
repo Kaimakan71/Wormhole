@@ -46,5 +46,5 @@ static inline void cpuSetCr3(uint64 cr3) {
     ASMV("movq %0, %%cr3" : : "r" (cr3) : "memory");
 }
 
-void cpuEarlyInitialize();
+void cpuPreInitialize();
 Status cpuInitialize();

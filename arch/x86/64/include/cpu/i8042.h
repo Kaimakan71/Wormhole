@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <types.h>
+#include <device.h>
 
 #define I8042_DATA_PORT    0x60
 #define I8042_COMMAND_PORT 0x64
@@ -28,5 +28,8 @@
 #define I8042_CONFIG_INT_ENABLE_B BIT(0)
 
 #define I8042_KEYBOARD_IRQ 1
+
+/* TODO: Don't expose this publicly */
+extern KeyboardDevice i8042KeyboardDevice;
 
 void i8042Initialize();

@@ -17,22 +17,22 @@ static DeviceClass pciDeviceClass = {
 };
 
 static inline void pciConfigSelect(uint8 bus, uint8 slot, uint8 function, uint8 offset) {
-    pmioWrite32(PCI_CONFIG_ADDRESS, PCI_CONFIG_ADDRESS_ENABLE | (bus << 16) | (slot << 11) | (function << 8) | (offset & 0xfc));
+    outl(PCI_CONFIG_ADDRESS, PCI_CONFIG_ADDRESS_ENABLE | (bus << 16) | (slot << 11) | (function << 8) | (offset & 0xfc));
 }
 
 static inline uint8 pciConfigRead8(uint8 bus, uint8 slot, uint8 function, uint8 offset) {
     pciConfigSelect(bus, slot, function, offset);
-    return pmioRead8(PCI_CONFIG_DATA + (offset & 3));
+    return inb(PCI_CONFIG_DATA + (offset & 3));
 }
 
 static inline uint16 pciConfigRead16(uint8 bus, uint8 slot, uint8 function, uint8 offset) {
     pciConfigSelect(bus, slot, function, offset);
-    return pmioRead16(PCI_CONFIG_DATA + (offset & 2));
+    return inw(PCI_CONFIG_DATA + (offset & 2));
 }
 
 static inline uint32 pciConfigRead32(uint8 bus, uint8 slot, uint8 function, uint8 offset) {
     pciConfigSelect(bus, slot, function, offset);
-    return pmioRead32(PCI_CONFIG_DATA);
+    return inl(PCI_CONFIG_DATA);
 }
 
 static inline uint16 pciGetVendorId(uint8 bus, uint8 slot, uint8 function) {
