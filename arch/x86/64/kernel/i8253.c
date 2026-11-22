@@ -49,7 +49,7 @@ void i8253Initialize() {
     outb(I8253_COMMAND_PORT, I8253_CHANNEL(0) | I8253_ACCESS_LOHI | I8253_MODE_SQUARE_WAVE);
 
     /* Register ISR */
-    idtSetVector(I8253_TIMER_IRQ + IDT_IRQ_OFFSET, (uint32) isr32, 0, IDT_ENTRY_TYPE_32BIT | IDT_ENTRY_TYPE_INTERRUPT, 0);
+    idtSetVector(I8253_TIMER_IRQ + IDT_IRQ_OFFSET, (uint64) isr32, 0, IDT_ENTRY_TYPE_32BIT | IDT_ENTRY_TYPE_INTERRUPT, 0);
     i8259Unmask(I8253_TIMER_IRQ);
 
     /* Register timer device */
